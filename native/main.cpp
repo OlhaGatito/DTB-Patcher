@@ -17,7 +17,7 @@ using namespace Gdiplus;
 namespace fs=std::filesystem;
 
 enum : int { ID_DONOR=101, ID_RECEIVER=102, ID_ANALYZE=103, ID_BUILD=104, ID_SWAP=105, ID_ABOUT=106 };
-static HWND g_main,g_donor,g_receiver,g_list,g_log,g_status,g_logo;
+static HWND g_main,g_donor,g_receiver,g_list,g_log,g_status,g_logo,g_title,g_sub;
 static std::vector<DtbChange> g_changes;
 static DtbNode g_donor_tree,g_receiver_tree;
 static ULONG_PTR g_gdiplus=0;
