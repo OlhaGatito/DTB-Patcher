@@ -47,7 +47,7 @@ jobs:
           mkdir -p build
           gcc -Dmain=dtc_internal_main -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c "$DTC/dtc.c" -o build/dtc_embedded.o
           gcc -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c native/dtc_bridge.c -o build/dtc_bridge.o
-          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static-libgcc -static-libstdc++ -o build/DTB-Patcher.exe
+          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/DTB-Patcher.exe
 
       - name: Native DTC smoke test
         shell: msys2 {0}
