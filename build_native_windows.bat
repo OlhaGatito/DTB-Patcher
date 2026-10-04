@@ -9,19 +9,45 @@ echo          DTB-Patcher - Native C++ Build
 echo ================================================
 echo.
 
-rem Always build from the folder where this BAT is located.
 cd /d "%~dp0"
 if errorlevel 1 goto :error_cd
 
 set "PROJECT_DIR=%CD%"
-set "BASH=C:\msys64\usr\bin\bash.exe"
+set "BASH="
 
 echo [INFO] Projeto: %PROJECT_DIR%
-echo [INFO] Verificando MSYS2...
+echo [INFO] Procurando uma instalacao valida do MSYS2...
 echo.
 
-if not exist "%BASH%" goto :error_msys2
+rem Optional explicit override.
+if defined MSYS2_ROOT if exist "%MSYS2_ROOT%\usr\bin\bash.exe" (
+    set "BASH=%MSYS2_ROOT%\usr\bin\bash.exe"
+    goto :msys2_found
+)
 
+rem Common MSYS2 installation locations.
+for %%P in (
+    "C:\msys64"
+    "%ProgramFiles%\msys64"
+    "%ProgramFiles(x86)%\msys64"
+    "%LOCALAPPDATA%\msys64"
+    "%USERPROFILE%\scoop\apps\msys2\current"
+) do (
+    if not defined BASH if exist "%%~P\usr\bin\bash.exe" (
+        if exist "%%~P\usr\bin\pacman.exe" set "BASH=%%~P\usr\bin\bash.exe"
+    )
+)
+
+rem If MSYS2 is on PATH, accept it only when pacman.exe is beside bash.exe.
+if not defined BASH (
+    for /f "delims=" %%B in ('where bash.exe 2^>nul') do (
+        if not defined BASH if exist "%%~dpBpacman.exe" set "BASH=%%B"
+    )
+)
+
+if not defined BASH goto :error_msys2
+
+:msys2_found
 echo [OK] MSYS2 encontrado: %BASH%
 echo.
 echo [1/3] Baixando e compilando o DTC oficial...
@@ -68,12 +94,19 @@ echo [ERRO] Nao foi possivel entrar na pasta do projeto.
 goto :stop
 
 :error_msys2
-echo [ERRO] MSYS2 nao foi encontrado.
+echo [ERRO] Nenhuma instalacao valida do MSYS2 foi encontrada.
 echo.
-echo Caminho esperado:
-echo C:\msys64\usr\bin\bash.exe
+echo Locais verificados:
+echo C:\msys64
+echo %%ProgramFiles%%\msys64
+echo %%ProgramFiles(x86)%%\msys64
+echo %%LOCALAPPDATA%%\msys64
+echo %%USERPROFILE%%\scoop\apps\msys2\current
 echo.
-echo Instale/configure o MSYS2 nesse caminho e tente novamente.
+echo Tambem foi verificado o PATH do Windows.
+echo.
+echo Se o MSYS2 estiver em outro local, defina:
+echo   MSYS2_ROOT=C:\caminho\para\msys64
 goto :stop
 
 :error_dtc
