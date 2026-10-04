@@ -1,0 +1,10 @@
+Device Tree Compiler (dtc)
+
+DTB-Patcher uses the Device Tree Compiler from:
+https://github.com/dgibson/dtc
+
+The upstream dtc project is distributed under the GNU General Public License v2.0 (GPL-2.0).
+
+This file documents the upstream component and its license. The corresponding source is available from the upstream repository above.
+
+DTB-Patcher does not modify the dtc source code when building it for Windows.
