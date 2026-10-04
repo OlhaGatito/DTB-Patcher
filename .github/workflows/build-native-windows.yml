@@ -32,6 +32,8 @@ jobs:
             make
             flex
             bison
+            pkgconf
+            diffutils
             mingw-w64-ucrt-x86_64-gcc
 
       - name: Build official DTC sources
