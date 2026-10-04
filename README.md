@@ -60,7 +60,7 @@ Essas ferramentas pertencem ao ambiente de build.
 
 ## 🧩 Arquitetura nativa
 
-A branch cpp-native concentra a migracao:
+A implementacao nativa concentra a migracao:
 
     native/
     ├── main.cpp
@@ -147,6 +147,6 @@ Consulte THIRD-PARTY-NOTICES.md e tools/DTC-LICENSE.txt antes de redistribuir bu
 
 ## 📌 Status
 
-**Em migracao para C++ nativo.**
+**Implementacao nativa em C++ em validacao.**
 
-A implementacao Python continua no repositorio durante a fase de validacao para permitir comparacao e rollback. A branch cpp-native sera promovida somente depois de o executavel nativo passar pelos testes de build e por validacao com DTBs reais.
+A implementacao Python foi removida do codigo ativo. O fluxo suportado e o executavel nativo, com o DTC integrado no mesmo processo. O executavel ainda deve ser validado com DTBs reais antes de ser considerado pronto para uso em hardware.
