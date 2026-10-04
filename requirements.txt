@@ -1,0 +1,2 @@
+# DTB Patcher currently uses Python's standard-library Tkinter GUI.
+# Backend dependencies will be added when the DTB engine is implemented.
