@@ -1,3 +1,0 @@
-# DTB-Patcher uses Python standard library for the application.
-# Build tool is installed separately:
-# python -m pip install pyinstaller
