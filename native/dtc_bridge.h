@@ -1,3 +1,7 @@
+/*
+ * Native C ABI used by the C++ application to call the upstream DTC
+ * parser/compiler without starting an external dtc.exe process.
+ */
 #pragma once
 #ifdef __cplusplus
 extern "C" {
