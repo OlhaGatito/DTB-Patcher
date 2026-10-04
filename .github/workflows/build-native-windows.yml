@@ -49,6 +49,14 @@ jobs:
           gcc -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c native/dtc_bridge.c -o build/dtc_bridge.o
           g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static-libgcc -static-libstdc++ -o build/DTB-Patcher.exe
 
+      - name: Native DTC smoke test
+        shell: msys2 {0}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          DTC=/tmp/dtc
+          g++ -std=c++17 -O2 -I"$DTC" -I"$DTC/libfdt" native/test_dtc.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static-libgcc -static-libstdc++ -o build/test_dtc.exe
+          ./build/test_dtc.exe tests/native-smoke.dts build/smoke
+
       - name: Verify executable
         shell: pwsh
         run: |
