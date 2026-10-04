@@ -4,12 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - cpp-native
+      - main
     tags:
       - "v*"
 
 permissions:
   contents: read
+
+concurrency:
+  group: native-windows-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -26,10 +30,9 @@ jobs:
           install: >-
             git
             make
+            flex
+            bison
             mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-gcc-libs
-            mingw-w64-ucrt-x86_64-flex
-            mingw-w64-ucrt-x86_64-bison
 
       - name: Build official DTC sources
         shell: msys2 {0}
@@ -60,12 +63,12 @@ jobs:
       - name: Verify executable
         shell: pwsh
         run: |
-          if (!(Test-Path "build\DTB-Patcher.exe")) { throw "Native executable was not produced." }
-          Get-Item "build\DTB-Patcher.exe" | Select-Object FullName,Length
+          if (!(Test-Path "build\\DTB-Patcher.exe")) { throw "Native executable was not produced." }
+          Get-Item "build\\DTB-Patcher.exe" | Select-Object FullName,Length
 
       - name: Package
         shell: pwsh
-        run: Compress-Archive -Path build\DTB-Patcher.exe -DestinationPath DTB-Patcher-Windows-Native.zip -Force
+        run: Compress-Archive -Path build\\DTB-Patcher.exe -DestinationPath DTB-Patcher-Windows-Native.zip -Force
 
       - name: Upload native build
         uses: actions/upload-artifact@v4
