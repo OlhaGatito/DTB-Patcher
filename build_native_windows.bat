@@ -41,9 +41,19 @@ echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
 echo.
 
-rem Evita variaveis Bash dentro de aspas duplas do CMD.
+rem O MSYS2 pode existir sem todos os pacotes de compilacao instalados.
+rem Instala somente as dependencias necessarias e depois verifica cada ferramenta.
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; pacman -S --needed --noconfirm git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc"
+if errorlevel 1 goto :error_deps_install
+
 "%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; command -v git >/dev/null 2>&1 && command -v make >/dev/null 2>&1 && command -v flex >/dev/null 2>&1 && command -v bison >/dev/null 2>&1 && command -v pkg-config >/dev/null 2>&1 && command -v cmp >/dev/null 2>&1 && command -v gcc >/dev/null 2>&1 && command -v g++ >/dev/null 2>&1"
-if errorlevel 1 goto :error_deps
+if errorlevel 1 goto :error_deps_install
+echo.
+echo [ERRO] O MSYS2 nao conseguiu instalar as dependencias necessarias.
+echo Verifique a conexao com os servidores do MSYS2 e tente novamente.
+goto :stop
+
+:error_deps
 
 echo [OK] Dependencias encontradas.
 echo.
