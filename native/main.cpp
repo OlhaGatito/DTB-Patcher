@@ -1,3 +1,16 @@
+/*
+ * DTB-Patcher native Windows GUI.
+ *
+ * Design goals:
+ *   - keep donor and receptor untouched;
+ *   - show differences before applying anything;
+ *   - call the integrated DTC directly, never dtc.exe via subprocess;
+ *   - keep the interface simple enough for a ready-to-use Windows build.
+ *
+ * Visual identity uses the Sarue mascot from Gatito-Ports. The mascot is
+ * rendered with Windows GDI+ so the final executable does not need an image
+ * runtime or a separate GUI toolkit.
+ */
 #include <windows.h>
 #include <commdlg.h>
 #include <commctrl.h>
