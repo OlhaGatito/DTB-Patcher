@@ -3,7 +3,7 @@ from tkinter import ttk,filedialog,messagebox
 from pathlib import Path
 from .engine import Engine
 from .workspace import Workspace
-from .dtc import DtcError
+from .dtc import DtcError, DtcManager
 
 class App(tk.Tk):
     def __init__(self):
@@ -23,6 +23,7 @@ class App(tk.Tk):
         ttk.Button(buttons,text="⇄ Trocar",command=self.swap).pack(side="left",padx=3)
         ttk.Button(buttons,text="ANALISAR DTBs",command=self.analyze).pack(side="left",padx=3)
         ttk.Button(buttons,text="GERAR NOVO DTB",command=self.build).pack(side="left",padx=3)
+        ttk.Button(buttons,text="Baixar dependências",command=self.download_dependencies).pack(side="left",padx=3)
         ttk.Button(buttons,text="Limpar",command=self.clear).pack(side="left",padx=3)
         body=ttk.Panedwindow(self,orient="vertical"); body.pack(fill="both",expand=True,padx=12,pady=5)
         tf=ttk.Frame(body); bf=ttk.Frame(body); body.add(tf,weight=4); body.add(bf,weight=1)
@@ -36,8 +37,21 @@ class App(tk.Tk):
     def pick(self,var):
         p=filedialog.askopenfilename(filetypes=[("Device Tree Binary","*.dtb"),("Todos","*.*")])
         if p: var.set(p)
-    def swap(self): self.donor.set(self.receiver.get()); self.receiver.set(self.donor.get()) if False else None
+    def swap(self):
+        donor, receiver = self.donor.get(), self.receiver.get()
+        self.donor.set(receiver); self.receiver.set(donor)
     def clear(self): self.tree.delete(*self.tree.get_children()); self.items=[]; self.log.delete("1.0","end")
+    def download_dependencies(self):
+        try:
+            manager = DtcManager()
+            target = manager.download_bundled()
+            version = manager.version()
+            self.logx(f"DTC instalado em: {target}")
+            self.logx(f"Versão: {version}")
+            messagebox.showinfo("Dependências", f"DTC instalado com sucesso em:\n{target}\n\n{version}")
+        except Exception as e:
+            self.logx(f"Falha ao baixar DTC: {e}")
+            messagebox.showerror("Falha ao baixar dependências", str(e))
     def analyze(self):
         if not Path(self.donor.get()).is_file() or not Path(self.receiver.get()).is_file():
             messagebox.showerror("DTB-Patcher","Selecione um DTB Doador e um DTB Receptor."); return
