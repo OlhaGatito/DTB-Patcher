@@ -42,7 +42,7 @@ jobs:
           rm -rf /tmp/dtc
           git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/dtc
           cd /tmp/dtc
-          make NO_YAML=1 NO_PYTHON=1
+          make NO_YAML=1 NO_PYTHON=1 dtc libfdt
 
       - name: Compile native DTB-Patcher
         shell: msys2 {0}
