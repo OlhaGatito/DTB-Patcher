@@ -38,7 +38,7 @@ static ULONG_PTR g_gdiplus=0;
 static COLORREF bg(){return RGB(246,244,239);}
 static COLORREF ink(){return RGB(55,48,42);}
 static COLORREF accent(){return RGB(196,104,110);}
-static std::string getText(HWND h){int n=GetWindowTextLengthA(h);std::string s(n,'\\0');if(n)GetWindowTextA(h,s.data(),n+1);return s;}
+static std::string getText(HWND h){int n=GetWindowTextLengthA(h);std::string s(n,'\0');if(n)GetWindowTextA(h,s.data(),n+1);return s;}
 static void setText(HWND h,const std::string&s){SetWindowTextA(h,s.c_str());}
 static void logLine(const std::string&s){int n=GetWindowTextLengthA(g_log);SendMessageA(g_log,EM_SETSEL,n,n);std::string x=s+"\\r\\n";SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());}
 static void setStatus(const std::string&s){SetWindowTextA(g_status,s.c_str());}
@@ -75,7 +75,7 @@ static void analyze(){
  ListView_DeleteAllItems(g_list);
  for(int i=0;i<(int)g_changes.size();++i){
   LVITEMA it{};it.mask=LVIF_TEXT;it.iItem=i;it.pszText=(LPSTR)g_changes[i].path.c_str();
-  ListView_InsertItemA(g_list,&it);
+  ListView_InsertItem(g_list,&it);
   ListView_SetItemText(g_list,i,1,(LPSTR)g_changes[i].kind.c_str());
   ListView_SetItemText(g_list,i,2,(LPSTR)g_changes[i].category.c_str());
   ListView_SetItemText(g_list,i,3,(LPSTR)g_changes[i].detail.c_str());
@@ -220,7 +220,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
  g_list=CreateWindowA(WC_LISTVIEWA,"",WS_CHILD|WS_VISIBLE|WS_BORDER|LVS_REPORT|LVS_SHOWSELALWAYS,24,268,926,355,g_main,0,hi,0);
  ListView_SetExtendedListViewStyle(g_list,LVS_EX_FULLROWSELECT|LVS_EX_CHECKBOXES|LVS_EX_DOUBLEBUFFER);
  const char* heads[]={"Transferencia","Tipo","Categoria","Detalhe"};int widths[]={430,120,130,240};
- for(int i=0;i<4;i++){LVCOLUMNA c{};c.mask=LVCF_TEXT|LVCF_WIDTH;c.pszText=(LPSTR)heads[i];c.cx=widths[i];ListView_InsertColumnA(g_list,i,&c);}
+ for(int i=0;i<4;i++){LVCOLUMNA c{};c.mask=LVCF_TEXT|LVCF_WIDTH;c.pszText=(LPSTR)heads[i];c.cx=widths[i];ListView_InsertColumn(g_list,i,&c);}
 
  g_log=CreateWindowA("EDIT","",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY,24,634,926,75,g_main,0,hi,0);setFont(g_log,9);
  g_status=CreateWindowA("STATIC","Pronto. Selecione dois DTBs para comecar.",WS_CHILD|WS_VISIBLE,24,720,926,25,g_main,0,hi,0);setFont(g_status,9,true);
