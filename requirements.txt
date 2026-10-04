@@ -1,2 +1,3 @@
-# DTB Patcher currently uses Python's standard-library Tkinter GUI.
-# Backend dependencies will be added when the DTB engine is implemented.
+# DTB-Patcher uses Python standard library for the application.
+# Build tool is installed separately:
+# python -m pip install pyinstaller

@@ -1,50 +1,43 @@
 # DTB-Patcher
 
-A GUI tool for safely comparing and transferring selected components between Device Tree Blobs (DTB).
+Ferramenta Windows para analisar e gerar Device Tree Blobs (DTB) usando um fluxo Doador -> Receptor.
 
-## Current status
+## Objetivos
+- nunca altera o DTB Doador;
+- nunca sobrescreve o DTB Receptor;
+- decompila DTB -> DTS e compila DTS -> DTB automaticamente;
+- mostra diferenças estruturais e permite selecionar transferências;
+- grava resultados em `Documents\DTB-Patcher\New dtb`;
+- gera relatório JSON junto do resultado;
+- mantém `Work`, `Backups`, `Projects` e `Logs`;
+- usa `dtc.exe` local, sem download automático.
 
-**Phase 1 — GUI foundation**
+## Estrutura
+```
+DTB-Patcher/
+  dtb_patcher/
+  tests/
+  tools/dtc.exe
+  main.py
+  run_windows.bat
+  build_windows.bat
+```
 
-The first version provides:
+## Instalação e teste no Windows
+```bat
+py -3 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install pytest pyinstaller
+tools\dtc.exe --version
+python -m pytest -q
+python main.py
+```
 
-- Source, destination and output DTB selection
-- Transfer-category selection
-- Compare and Build workflow placeholders
-- Operation log
-- Progress bar
-- Separation between GUI and future DTB backend
+## Build
+```bat
+build_windows.bat
+```
+O resultado fica em `dist\DTB-Patcher\DTB-Patcher.exe`.
 
-The DTB parser, diff engine, transfer engine, validation, and automatic dtc compilation/descompilation will be implemented in the next phase.
-
-## Architecture
-
-    DTB
-     ↓
-    dtc -I dtb -O dts
-     ↓
-    DTS parser
-     ↓
-    Structural comparison
-     ↓
-    Selected component transfer
-     ↓
-    Validation
-     ↓
-    dtc -I dts -O dtb
-     ↓
-    Patched DTB
-
-## Run
-
-Linux/WSL:
-
-    python3 main.py
-
-Windows:
-
-    python main.py
-
-## Design rule
-
-The GUI must never directly manipulate DTS text. All DTB/DTS parsing and patching belongs to the backend layer. This keeps the transfer engine independently testable and prevents UI code from becoming coupled to device-tree internals.
+> Nota: o parser é deliberadamente conservador. Transferências com dependências/refs ambíguas devem ser recusadas antes de virar uma etapa mais avançada de resolução de phandles.
