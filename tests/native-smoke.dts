@@ -1,0 +1,11 @@
+/dts-v1/;
+
+/ {
+    compatible = "dtb-patcher,smoke";
+    model = "DTB-Patcher Native Smoke Test";
+
+    test-node {
+        test-value = <0x12345678>;
+        test-string = "native";
+    };
+};
