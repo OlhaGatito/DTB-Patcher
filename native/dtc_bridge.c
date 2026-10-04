@@ -3,17 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-int quiet;
-unsigned int reservenum;
-int minsize;
-int padsize;
-int alignsize;
-int phandle_format = PHANDLE_EPAPR;
-int generate_symbols;
-int generate_fixups;
-int auto_label_aliases;
-int annotate;
-
 static char last_error[2048];
 
 static void reset_state(void) {
