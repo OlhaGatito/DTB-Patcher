@@ -40,22 +40,28 @@ echo [OK] MSYS2 encontrado: %BASH%
 echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
 echo.
-
-rem O MSYS2 pode existir sem todos os pacotes de compilacao instalados.
-rem Instala somente as dependencias necessarias e depois verifica cada ferramenta.
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; pacman -S --needed --noconfirm git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc"
-if errorlevel 1 goto :error_deps_install
-
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; command -v git >/dev/null 2>&1 && command -v make >/dev/null 2>&1 && command -v flex >/dev/null 2>&1 && command -v bison >/dev/null 2>&1 && command -v pkg-config >/dev/null 2>&1 && command -v cmp >/dev/null 2>&1 && command -v gcc >/dev/null 2>&1 && command -v g++ >/dev/null 2>&1"
-if errorlevel 1 goto :error_deps_install
+echo [INFO] Diagnostico das ferramentas MSYS2:
 echo.
-echo [ERRO] O MSYS2 nao conseguiu instalar as dependencias necessarias.
-echo Verifique a conexao com os servidores do MSYS2 e tente novamente.
-goto :stop
 
-:error_deps
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; printf '  git        '; command -v git || echo FALTANDO; printf '  make       '; command -v make || echo FALTANDO; printf '  flex       '; command -v flex || echo FALTANDO; printf '  bison      '; command -v bison || echo FALTANDO; printf '  pkg-config '; command -v pkg-config || echo FALTANDO; printf '  cmp        '; command -v cmp || echo FALTANDO; printf '  gcc        '; command -v gcc || echo FALTANDO; printf '  g++        '; command -v g++ || echo FALTANDO"
+if errorlevel 1 goto :error_deps
 
-echo [OK] Dependencias encontradas.
+echo.
+echo [INFO] Verificando pacotes MSYS2 instalados:
+echo.
+
+"%BASH%" -lc "pacman -Q git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc 2>&1"
+if errorlevel 1 (
+    echo.
+    echo [AVISO] Um ou mais pacotes acima nao estao instalados.
+    echo [INFO] O script nao vai instalar nada automaticamente.
+    echo [INFO] Para instalar manualmente, use o MSYS2 UCRT64:
+    echo        pacman -S --needed git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc
+    goto :error_deps
+)
+
+echo.
+echo [OK] Ferramentas e pacotes necessarios encontrados.
 echo.
 echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
