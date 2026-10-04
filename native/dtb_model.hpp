@@ -1,3 +1,8 @@
+/*
+ * Structural model used by DTB-Patcher after DTC converts a DTB to DTS.
+ * This layer is intentionally independent from the DTC implementation so
+ * comparison and transfer policy can evolve without changing the compiler.
+ */
 #pragma once
 #include <string>
 #include <vector>
