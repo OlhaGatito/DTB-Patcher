@@ -1,3 +1,10 @@
+/*
+ * DTB-Patcher native DTC bridge.
+ *
+ * The implementation deliberately uses the upstream DTC front-end APIs
+ * instead of reimplementing DTS parsing or DTB serialization here.
+ * This file is compiled together with the official DTC sources.
+ */
 #include "dtc_bridge.h"
 #include "dtc.h"
 #include "version_gen.h"
