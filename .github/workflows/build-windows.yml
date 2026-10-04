@@ -1,0 +1,70 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout DTB-Patcher
+        uses: actions/checkout@v4
+
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            make
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-flex
+            mingw-w64-ucrt-x86_64-bison
+
+      - name: Build Device Tree Compiler (dtc)
+        shell: msys2 {0}
+        run: |
+          rm -rf /tmp/dtc
+          git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/dtc
+          cd /tmp/dtc
+          make NO_YAML=1 NO_PYTHON=1
+          test -f dtc.exe
+          mkdir -p /c/workspace/tools
+          cp dtc.exe /c/workspace/tools/dtc.exe
+
+      - name: Prepare Python
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller pytest
+
+      - name: Run tests
+        shell: pwsh
+        run: python -m pytest -q
+
+      - name: Build DTB-Patcher
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force tools | Out-Null
+          Copy-Item C:\workspace\tools\dtc.exe tools\dtc.exe -Force
+          python -m PyInstaller --noconfirm --clean --windowed --name DTB-Patcher --add-data "tools;tools" main.py
+
+      - name: Verify bundled DTC
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist\DTB-Patcher\tools\dtc.exe")) { throw "dtc.exe não foi incluído no build." }
+
+      - name: Package
+        shell: pwsh
+        run: Compress-Archive -Path dist\DTB-Patcher\* -DestinationPath DTB-Patcher-Windows.zip -Force
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: DTB-Patcher-Windows
+          path: DTB-Patcher-Windows.zip
