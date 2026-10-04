@@ -38,9 +38,6 @@ static ULONG_PTR g_gdiplus=0;
 static COLORREF bg(){return RGB(246,244,239);}
 static COLORREF ink(){return RGB(55,48,42);}
 static COLORREF accent(){return RGB(196,104,110);}
-static COLORREF cream(){return RGB(255,252,246);}
-static COLORREF panel(){return RGB(255,255,255);}
-
 static std::string getText(HWND h){int n=GetWindowTextLengthA(h);std::string s(n,'\\0');if(n)GetWindowTextA(h,s.data(),n+1);return s;}
 static void setText(HWND h,const std::string&s){SetWindowTextA(h,s.c_str());}
 static void logLine(const std::string&s){int n=GetWindowTextLengthA(g_log);SendMessageA(g_log,EM_SETSEL,n,n);std::string x=s+"\\r\\n";SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());}
@@ -104,10 +101,6 @@ static void build(){
  logLine("Novo DTB gerado: "+out.string());
  setStatus(std::to_string(applied)+" transferencia(s) aplicada(s).");
  MessageBoxA(g_main,out.string().c_str(),"DTB criado com sucesso",MB_ICONINFORMATION);
-}
-
-static void rounded(Graphics& g,RectF r,REAL radius,Color fill){
- SolidBrush b(fill);g.FillRoundedRectangle(&b,radius,radius,r);
 }
 
 static void drawSarue(Graphics& g,float x,float y,float scale){
