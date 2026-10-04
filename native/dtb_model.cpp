@@ -1,3 +1,10 @@
+/*
+ * Lightweight structural DTS model for the current native migration.
+ *
+ * This parser is intentionally kept separate from upstream DTC. It provides
+ * the user-facing comparison layer; the native DTC remains responsible for
+ * authoritative DTB/DTS parsing and serialization.
+ */
 #include "dtb_model.hpp"
 #include <fstream>
 #include <sstream>
