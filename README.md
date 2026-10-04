@@ -1,69 +1,61 @@
-# DTB-Patcher
+# DTB-Patcher — Native C++ edition
 
-Ferramenta Windows para analisar e gerar Device Tree Blobs (DTB) usando um fluxo Doador -> Receptor.
+O DTB-Patcher é uma ferramenta Windows para analisar Device Tree Blobs e gerar novos DTBs a partir do fluxo Doador -> Receptor.
 
-## Objetivos
+## Objetivo
 
-- nunca altera o DTB Doador;
-- nunca sobrescreve o DTB Receptor;
-- decompila DTB -> DTS e compila DTS -> DTB automaticamente;
-- mostra diferenças estruturais e permite selecionar transferências;
-- grava resultados em `Documents\\DTB-Patcher\\New dtb`;
-- gera relatório JSON junto do resultado;
-- mantém `Work`, `Backups`, `Projects` e `Logs`;
-- usa o Device Tree Compiler (dtc) open source;
-- os builds Windows incluem `dtc.exe` junto do programa.
+A versão de produção está sendo migrada para C++ nativo para que o usuário final receba um executável pronto: DTB-Patcher.exe.
+
+O programa não depende de Python, PyInstaller, MSYS2, GCC ou de um dtc.exe externo para funcionar.
+
+O Device Tree Compiler (DTC) oficial é incorporado ao processo durante a compilação. O executável final chama o código do DTC no mesmo processo, em vez de iniciar um programa externo.
+
+## Arquitetura
+
+DTB-Patcher.exe -> GUI Win32/C++ -> motor de transferência C++ -> DTC nativo integrado
+
+## Fluxo
+
+1. Selecionar DTB Doador.
+2. Selecionar DTB Receptor.
+3. Analisar as diferenças.
+4. Marcar as transferências desejadas.
+5. Gerar um novo DTB.
+6. O Doador e o Receptor originais permanecem intactos.
+7. Resultados em Documents\DTB-Patcher\New dtb\patch-NNN.dtb.
 
 ## DTC
 
-O DTB-Patcher usa o **Device Tree Compiler (dtc)** do projeto oficial:
+Projeto oficial: https://github.com/dgibson/dtc
 
-https://github.com/dgibson/dtc
+O DTC é distribuído sob GPL-2.0-or-later. Os avisos/licença correspondentes permanecem no projeto.
 
-O upstream é distribuído sob GPL v2. O arquivo `tools/DTC-LICENSE.txt` documenta a origem e a licença do componente.
+## Build Windows
 
-O workflow de Windows compila o `dtc.exe` a partir do código-fonte upstream e o coloca em `tools\\dtc.exe`. O mesmo arquivo é incluído no pacote do DTB-Patcher.
+O workflow .github/workflows/build-native-windows.yml baixa o código-fonte oficial do DTC, gera seus componentes, compila o bridge, o motor C++ e a GUI Win32 e produz DTB-Patcher-Windows-Native.zip.
 
-## Estrutura
+MSYS2/GCC/Flex/Bison são dependências de build, não dependências do usuário final.
 
-```
-DTB-Patcher/
-  dtb_patcher/
-  tests/
-  tools/
-    dtc.exe
-    DTC-LICENSE.txt
-  .github/workflows/
-    build-windows.yml
-  main.py
-  run_windows.bat
-  build_windows.bat
-```
+## Migração
 
-## Instalação e teste no Windows
+A implementação Python permanece temporariamente para comparação e rollback.
 
-```bat
-py -3 -m venv .venv
-.venv\\Scripts\\activate
-python -m pip install --upgrade pip
-python -m pip install pytest pyinstaller
-tools\\dtc.exe --version
-python -m pytest -q
-python main.py
-```
+A implementação nativa fica em native/main.cpp, native/dtb_model.cpp, native/dtb_model.hpp, native/dtc_bridge.c e native/dtc_bridge.h.
 
-## Build local
+A implementação nativa será validada com DTBs reais antes de substituir definitivamente a versão Python.
 
-```bat
-build_windows.bat
-```
+## Validação obrigatória
 
-O resultado fica em `dist\\DTB-Patcher\\DTB-Patcher.exe`.
+- phandles
+- GPIO/pinctrl
+- audio-routing
+- display/backlight
+- propriedades binárias
+- strings múltiplas
+- /bits/
+- /memreserve/
+- nós com @
+- referências &label e &{/path}
+- geração repetida de patch-NNN.dtb
 
-Para um build totalmente reproduzível com o `dtc.exe` compilado automaticamente, use o workflow **Build Windows** em GitHub Actions. O artefato gerado é `DTB-Patcher-Windows.zip` e contém o DTB-Patcher e o DTC.
-
-## Segurança do fluxo
-
-O parser é deliberadamente conservador. Transferências com dependências ou referências ambíguas devem ser recusadas antes de virar uma etapa mais avançada de resolução de phandles.
-
-O Doador permanece somente leitura durante o fluxo. O Receptor original também não é sobrescrito; cada resultado é salvo como um novo DTB numerado.
+Nenhum resultado deve substituir o Doador ou o Receptor original.
