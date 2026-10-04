@@ -1,5 +1,6 @@
 #include "dtc_bridge.h"
 #include "dtc.h"
+#include "version_gen.h"
 #include <stdio.h>
 #include <string.h>
 
