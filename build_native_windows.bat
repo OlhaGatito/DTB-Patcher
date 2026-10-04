@@ -41,9 +41,11 @@ echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; for c in git make flex bison pkg-config cmp gcc g++; do if ! command -v "$c" >/dev/null 2>&1; then echo "[ERRO] Dependencia ausente: $c"; exit 1; fi; done; echo "[OK] Dependencias encontradas."
+rem Evita variaveis Bash dentro de aspas duplas do CMD.
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; command -v git >/dev/null 2>&1 && command -v make >/dev/null 2>&1 && command -v flex >/dev/null 2>&1 && command -v bison >/dev/null 2>&1 && command -v pkg-config >/dev/null 2>&1 && command -v cmp >/dev/null 2>&1 && command -v gcc >/dev/null 2>&1 && command -v g++ >/dev/null 2>&1"
 if errorlevel 1 goto :error_deps
 
+echo [OK] Dependencias encontradas.
 echo.
 echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
