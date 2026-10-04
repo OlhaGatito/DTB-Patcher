@@ -16,7 +16,7 @@ The project is designed around a simple rule:
 
 ## Native architecture
 
-The production direction is C++/Win32. The Device Tree Compiler (DTC) is compiled from its official source and linked into the native application instead of being launched as an external dtc.exe process.
+The production implementation is C++/Win32. The Device Tree Compiler (DTC) is compiled from its official source and linked into the native application instead of being launched as an external dtc.exe process.
 
 The final distribution is intended to be a ready-to-use Windows executable.
 
@@ -35,6 +35,6 @@ DTC is licensed under GPL-2.0-or-later. See tools/DTC-LICENSE.txt and THIRD-PART
 
 ## Project status
 
-The native C++ implementation is under active validation. The Python implementation is retained temporarily as a reference and rollback path.
+The native C++ implementation is under active validation. The old Python implementation and legacy Python build files have been removed from the active repository.
 
-The native implementation must be validated with real DTBs before it replaces the older implementation on the default branch.
+The native implementation must be validated with real DTBs before the application is considered ready for hardware use.
