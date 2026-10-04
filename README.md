@@ -1,61 +1,152 @@
-# DTB-Patcher — Native C++ edition
+# DTB-Patcher
 
-O DTB-Patcher é uma ferramenta Windows para analisar Device Tree Blobs e gerar novos DTBs a partir do fluxo Doador -> Receptor.
+**Analise, compare e gere novos Device Tree Blobs com controle explicito sobre cada transferencia.**
 
-## Objetivo
+DTB-Patcher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O projeto trabalha com **Doador -> Receptor -> Patch**, mantendo os arquivos originais intactos.
 
-A versão de produção está sendo migrada para C++ nativo para que o usuário final receba um executável pronto: DTB-Patcher.exe.
+![Saruê](assets/sarue.svg)
 
-O programa não depende de Python, PyInstaller, MSYS2, GCC ou de um dtc.exe externo para funcionar.
+## ✨ Destaques
 
-O Device Tree Compiler (DTC) oficial é incorporado ao processo durante a compilação. O executável final chama o código do DTC no mesmo processo, em vez de iniciar um programa externo.
+- GUI nativa para Windows.
+- Migracao para C++/Win32.
+- Device Tree Compiler integrado ao processo.
+- Nenhum dtc.exe externo exigido pelo aplicativo final.
+- Comparacao estrutural entre DTBs.
+- Selecao individual das diferencas.
+- Doador e Receptor nunca sao sobrescritos.
+- Geracao automatica de patch-001.dtb, patch-002.dtb e assim por diante.
+- Mascote Saruê do Gatito-Ports.
+- Documentacao de arquitetura, seguranca e contribuicao.
 
-## Arquitetura
+## 🧭 Como funciona
 
-DTB-Patcher.exe -> GUI Win32/C++ -> motor de transferência C++ -> DTC nativo integrado
+    DTB Doador
+         |
+         v
+    DTC nativo -> estrutura DTS
+         |
+         +---- comparar ----+
+         |                  |
+         v                  v
+    Diferencas         DTB Receptor
+         |
+         v
+    Selecao explicita
+         |
+         v
+    Novo DTB
+         |
+         v
+    Documents/DTB-Patcher/New dtb/
 
-## Fluxo
+O objetivo e tornar a transferencia auditavel: o usuario consegue ver o caminho, tipo, categoria e motivo de cada diferenca antes de gerar o arquivo.
 
-1. Selecionar DTB Doador.
-2. Selecionar DTB Receptor.
-3. Analisar as diferenças.
-4. Marcar as transferências desejadas.
-5. Gerar um novo DTB.
-6. O Doador e o Receptor originais permanecem intactos.
-7. Resultados em Documents\DTB-Patcher\New dtb\patch-NNN.dtb.
+## 🖥️ Distribuicao
 
-## DTC
+A versao final sera distribuida como um executavel Windows pronto para uso.
 
-Projeto oficial: https://github.com/dgibson/dtc
+O usuario final nao deve precisar instalar:
 
-O DTC é distribuído sob GPL-2.0-or-later. Os avisos/licença correspondentes permanecem no projeto.
+- Python;
+- PyInstaller;
+- GCC;
+- MinGW;
+- MSYS2;
+- Flex/Bison;
+- dtc.exe.
 
-## Build Windows
+Essas ferramentas pertencem ao ambiente de build.
 
-O workflow .github/workflows/build-native-windows.yml baixa o código-fonte oficial do DTC, gera seus componentes, compila o bridge, o motor C++ e a GUI Win32 e produz DTB-Patcher-Windows-Native.zip.
+## 🧩 Arquitetura nativa
 
-MSYS2/GCC/Flex/Bison são dependências de build, não dependências do usuário final.
+A branch cpp-native concentra a migracao:
 
-## Migração
+    native/
+    ├── main.cpp
+    ├── dtb_model.cpp
+    ├── dtb_model.hpp
+    ├── dtc_bridge.c
+    └── dtc_bridge.h
 
-A implementação Python permanece temporariamente para comparação e rollback.
+O DTC oficial e compilado durante o build e ligado ao aplicativo. A aplicacao chama o codigo do compilador no mesmo processo.
 
-A implementação nativa fica em native/main.cpp, native/dtb_model.cpp, native/dtb_model.hpp, native/dtc_bridge.c e native/dtc_bridge.h.
+A interface usa Win32 e GDI+ para manter a distribuicao simples e nativa.
 
-A implementação nativa será validada com DTBs reais antes de substituir definitivamente a versão Python.
+## 🎨 Saruê / Gatito-Ports
 
-## Validação obrigatória
+A identidade visual usa o Saruê do projeto Gatito-Ports.
 
-- phandles
-- GPIO/pinctrl
-- audio-routing
-- display/backlight
-- propriedades binárias
-- strings múltiplas
-- /bits/
-- /memreserve/
-- nós com @
-- referências &label e &{/path}
-- geração repetida de patch-NNN.dtb
+Gatito-Ports:
+https://github.com/OlhaGatito/Gatito-Ports
 
-Nenhum resultado deve substituir o Doador ou o Receptor original.
+O vetor original utilizado pelo DTB-Patcher esta em:
+
+    assets/sarue.svg
+
+## 🛡️ Filosofia de seguranca
+
+**Nunca editar sem entender.**
+
+O projeto segue estas regras:
+
+1. Inspecionar antes de modificar.
+2. Comparar estruturalmente.
+3. Exigir selecao explicita.
+4. Gerar um novo DTB.
+5. Preservar Doador e Receptor.
+6. Manter backups e resultados numerados.
+7. Validar o resultado antes de usa-lo no hardware.
+
+Um DTB incorreto pode impedir o boot ou alterar configuracoes de hardware. Por isso, resultados ainda devem ser considerados artefatos de teste ate serem validados no dispositivo.
+
+## 🔬 Validacao
+
+As areas prioritarias sao:
+
+- phandles;
+- GPIO/pinctrl;
+- audio-routing;
+- display/backlight;
+- propriedades binarias;
+- strings multiplas;
+- /bits/;
+- /memreserve/;
+- nos com unit address;
+- labels;
+- referencias por caminho;
+- round-trip DTS -> DTB -> DTS;
+- geracao repetida de patches.
+
+## 📚 Documentacao
+
+- ABOUT.md — historia, arquitetura e identidade do projeto.
+- CONTRIBUTING.md — regras para contribuicao.
+- SECURITY.md — seguranca e cuidados com DTBs.
+- THIRD-PARTY-NOTICES.md — componentes e ativos de terceiros.
+- CHANGELOG.md — historico de mudancas.
+- tools/DTC-LICENSE.txt — licenca do DTC.
+
+## 🏗️ Build
+
+GitHub Actions:
+
+    .github/workflows/build-native-windows.yml
+
+Build local:
+
+    build_native_windows.bat
+
+O build de producao baixa o codigo-fonte oficial do DTC, compila os componentes nativos e produz o executavel.
+
+## ⚖️ Licenciamento
+
+O DTB-Patcher incorpora codigo do Device Tree Compiler (DTC), distribuido sob GPL-2.0-or-later.
+
+Consulte THIRD-PARTY-NOTICES.md e tools/DTC-LICENSE.txt antes de redistribuir builds que incorporem o DTC.
+
+## 📌 Status
+
+**Em migracao para C++ nativo.**
+
+A implementacao Python continua no repositorio durante a fase de validacao para permitir comparacao e rollback. A branch cpp-native sera promovida somente depois de o executavel nativo passar pelos testes de build e por validacao com DTBs reais.
