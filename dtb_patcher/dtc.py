@@ -7,7 +7,9 @@ class DtcError(RuntimeError):
     pass
 
 class DtcManager:
-    BUNDLED_DTC_URL = "https://raw.githubusercontent.com/OlhaGatito/DTB-Patcher/main/tools/dtc.exe"
+    # Stable dependency branch containing the Windows DTC built from the
+    # official dtc source repository by GitHub Actions.
+    BUNDLED_DTC_URL = "https://raw.githubusercontent.com/OlhaGatito/DTB-Patcher/dtc-bundled/tools/dtc.exe"
 
     def __init__(self, configured=None):
         self.configured = Path(configured) if configured else None
@@ -41,8 +43,8 @@ class DtcManager:
                 data = response.read()
         except (HTTPError, URLError, TimeoutError) as e:
             raise DtcError(
-                "Não foi possível baixar o DTC do repositório oficial do DTB-Patcher. "
-                "Verifique a internet e tente novamente.\n\n"
+                "Não foi possível baixar o DTC da branch de dependência do DTB-Patcher. "
+                "Verifique a internet e tente novamente.\\n\\n"
                 f"Detalhes: {e}"
             ) from e
         if len(data) < 4096 or data[:2] != b"MZ":
