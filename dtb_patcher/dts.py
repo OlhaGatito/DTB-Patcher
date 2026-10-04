@@ -2,11 +2,14 @@ import re
 from pathlib import Path
 from .models import Document, Node, Property
 
-TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|/\\*.*?\\*/|//[^\\n]*|[{};:=<>\\[\\],&]|[^\\s{};:=<>\\[\\],&]+', re.S)
+TOKEN = re.compile(
+    r'"(?:\\.|[^"\\])*"|/\\*.*?\\*/|//[^\n]*|[{};:=<>\[\],&]|[^\s{};:=<>\[\],&]+',
+    re.S,
+)
 
 def strip_comments(s):
     s = re.sub(r'/\\*.*?\\*/', '', s, flags=re.S)
-    return re.sub(r'//[^\\n]*', '', s)
+    return re.sub(r'//[^\n]*', '', s)
 
 def tokens(s):
     return TOKEN.findall(strip_comments(s))
@@ -21,9 +24,20 @@ def parse_dts(path):
 
     while i < len(ts):
         t = ts[i]
-        if t in ("/dts-v1/;", "/dts-v1/", "/memreserve/"):
+
+        if t in ("/dts-v1/;", "/dts-v1/"):
             while i < len(ts) and ts[i] != ";":
                 i += 1
+            i += 1
+            continue
+
+        if t == "/memreserve/":
+            while i < len(ts) and ts[i] != ";":
+                i += 1
+            i += 1
+            continue
+
+        if t == "/plugin/;":
             i += 1
             continue
 
@@ -59,8 +73,11 @@ def parse_dts(path):
             i += 1
         if i < len(ts):
             i += 1
+
         stack[-1].properties[name] = Property(
-            name, " ".join(val), raw=" ".join(val)
+            name,
+            " ".join(val),
+            raw=" ".join(val),
         )
 
         while len(stack) > 1 and i < len(ts) and ts[i] == "}":
@@ -76,6 +93,7 @@ def render_value(v):
 
 def render_node(n, level=0):
     ind = "\t" * level
+
     if n.path == "/":
         body = []
         for p in n.properties.values():
@@ -94,5 +112,5 @@ def render_node(n, level=0):
     return "\n".join(out)
 
 def render(doc):
-    header = "/dts-v1/;\n\n/plugin/;\n\n" if "/plugin/" in doc.text else "/dts-v1/;\n\n"
+    header = "/dts-v1/;\n\n/plugin/;\n\n" if "/plugin/;" in doc.text else "/dts-v1/;\n\n"
     return header + "/ {\n" + render_node(doc.root, 1) + "\n};\n"
