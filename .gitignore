@@ -1,0 +1,20 @@
+# Native build output
+build/
+*.o
+*.obj
+*.a
+*.dll
+*.exe
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Python compatibility environment
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Temporary DTB/DTS artifacts
+*.dts.tmp
+*.dtb.tmp
