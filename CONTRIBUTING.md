@@ -8,14 +8,12 @@ Thank you for helping improve DTB-Patcher.
 2. Do not make blind DTB transformations.
 3. Never overwrite the original donor or receptor.
 4. Prefer structural/semantic operations over text substitution.
-5. Keep the native C++ implementation independent from the old Python implementation until validation is complete.
+5. Keep the native C++ implementation as the single active implementation.
 6. Every change that affects DTB generation should include a test or a clearly documented validation procedure.
 7. Keep third-party source and license notices intact.
 8. Do not commit private DTBs, firmware dumps, proprietary game files, or personal data.
 
 ## Native build
-
-The native branch is cpp-native.
 
 The build environment may use MSYS2, GCC, Flex and Bison, but these are build-time tools. They are not intended to be required by the end user.
 
