@@ -36,7 +36,7 @@ if not defined MSYS2_ROOT (
 if not defined MSYS2_ROOT goto :error_msys2
 
 set "BASH=%MSYS2_ROOT%\usr\bin\bash.exe"
-for /f "delims=" %%U in ('"%BASH%" -lc "cygpath -u \"%PROJECT_DIR%\""') do set "PROJECT_DIR_UNIX=%%U"
+for /f "delims=" %%U in ('"%MSYS2_ROOT%\usr\bin\cygpath.exe" -u "%PROJECT_DIR%"') do set "PROJECT_DIR_UNIX=%%U"
 echo [OK] MSYS2 encontrado: %BASH%
 echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
