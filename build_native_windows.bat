@@ -67,7 +67,7 @@ echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && sed -i 's/fill_fullpaths/dtbp_fill_fullpaths/g' dtc.c && export C_INCLUDE_PATH=$(cygpath -u '%PROJECT_DIR%')/native && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" checks.o data.o flattree.o fstree.o srcpos.o treesource.o util.o dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && export C_INCLUDE_PATH=$(cygpath -u '%PROJECT_DIR%')/native && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" checks.o data.o flattree.o fstree.o srcpos.o treesource.o util.o dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a"
 if errorlevel 1 goto :error_dtc
 
 echo.
