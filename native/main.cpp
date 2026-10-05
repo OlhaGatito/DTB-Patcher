@@ -30,7 +30,7 @@ enum : int {
  ID_LIST_POWER=304, ID_LIST_OTHER=305
 };
 
-static HWND g_main=nullptr,g_donor=nullptr,g_receiver=nullptr,g_log=nullptr,g_status=nullptr;
+static HWND g_main=nullptr,g_donor=nullptr,g_receiver=nullptr,g_log=nullptr,g_status=nullptr,g_donorLabel=nullptr,g_receiverLabel=nullptr;
 static HWND g_donorInfo=nullptr,g_receiverInfo=nullptr;
 static HWND g_lists[5]{};
 static std::vector<DtbChange> g_changes;
@@ -335,16 +335,16 @@ static void drawIcon(Graphics& g,int kind,float x,float y,float s){
  }
 }
 
-static void drawCard(Graphics& g,int x,int y,int w,int h,int kind,int count){
+static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius){ GraphicsPath path; path.AddArc(x,y,radius,radius,180,90); path.AddArc(x+w-radius,y,radius,radius,270,90); path.AddArc(x+w-radius,y+h-radius,radius,radius,0,90); path.AddArc(x,y+h-radius,radius,radius,90,90); path.CloseFigure(); g.FillPath(&br,&path); g.DrawPath(&pn,&path); }\n\nstatic void drawCard(Graphics& g,int x,int y,int w,int h,int kind,int count){
  SolidBrush br(Color(255,255,253,249));Pen pn(Color(255,224,216,205),1.2f);
- g.FillRoundedRectangle(&br,x,y,w,h,10,10);g.DrawRoundedRectangle(&pn,x,y,w,h,10,10);
+ roundFill(g,br,pn,x,y,w,h,10.0f);
  drawIcon(g,kind,(float)x+10,(float)y+7,0.65f);
  FontFamily ff(L"Segoe UI");Font title(&ff,13,FontStyleBold,UnitPixel);Font small(&ff,10,FontStyleRegular,UnitPixel);
  SolidBrush txt(Color(255,55,48,42)),mut(Color(255,111,100,91));
  std::wstring wt;for(char c:std::string(categoryTitle(kind)))wt.push_back((wchar_t)(unsigned char)c);
  std::wstring wd;for(char c:std::string(categoryDescription(kind)))wd.push_back((wchar_t)(unsigned char)c);
  g.DrawString(wt.c_str(),-1,&title,PointF((REAL)x+56,(REAL)y+9),&txt);
- g.DrawString(wd.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+28),&mut);
+ g.DrawString(wd.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+28),&mut);\n std::wstring wc=std::to_wstring(count)+L" item(ns)"; g.DrawString(wc.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+41),&mut);
 }
 
 static HFONT makeFont(int size,bool bold=false){
@@ -362,7 +362,7 @@ static void layout(){
  int colW=(W-2*margin-gap)/2;
  int rowH=62;
 
- MoveWindow(g_donor,margin+90,y+26,colW-170,30,TRUE);
+ MoveWindow(g_donorLabel,margin,y+28,80,20,TRUE);\n MoveWindow(g_receiverLabel,margin,y+28+rowH,80,20,TRUE);\n MoveWindow(g_donor,margin+90,y+26,colW-170,30,TRUE);
  MoveWindow(g_receiver,margin+90,y+26+rowH,colW-170,30,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_DONOR),W-margin-72,y+26,72,30,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_RECEIVER),W-margin-72,y+26+rowH,72,30,TRUE);
@@ -372,7 +372,7 @@ static void layout(){
  int rightX=margin+colW+gap;
  MoveWindow(GetDlgItem(g_main,ID_SWAP),rightX,y+8,180,32,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_ANALYZE),rightX+190,y+8,145,32,TRUE);
- MoveWindow(GetDlgItem(g_main,ID_BUILD),rightX,y+46,335,34,TRUE);
+ MoveWindow(GetDlgItem(g_main,ID_BUILD),rightX,y+46,335,34,TRUE);\n MoveWindow(GetDlgItem(g_main,ID_ABOUT),W-margin-80,18,80,30,TRUE);
 
  int cardsTop=y+2*rowH+18;
  int available=H-cardsTop-112;
