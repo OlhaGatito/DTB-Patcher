@@ -19,6 +19,9 @@ static volatile int dtbp_exit_active=0;
 static FILE* dtbp_active_out=NULL;
 static char dtbp_active_tmp[4096];
 
+/* Exported from the embedded/patched dtc.c during the native build. */
+extern void dtbp_fill_fullpaths(struct node* tree, const char* prefix);
+
 /* DTC fatal helpers call exit(). In the standalone CLI that is fine; inside
  * Gatito Dtb Pacher it would terminate the GUI. The native build compiles
  * DTC with -Dexit=dtbp_dtc_exit so fatal DTC paths return here. */
