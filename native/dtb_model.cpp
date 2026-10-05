@@ -51,7 +51,7 @@ std::vector<std::string> lex(const std::string& in){
             i=j;
             continue;
         }
-        if(std::string("{};=<>[]:").find(in[i])!=std::string::npos){
+        if(std::string("{};=<>[],:").find(in[i])!=std::string::npos){
             o.emplace_back(1,in[i]);++i;continue;
         }
         size_t j=i;
@@ -84,6 +84,16 @@ struct Parser{
             if(t[p]==";"){++p;continue;}
 
             std::string a=t[p++];
+            // Comma is a value separator, but it is also legal in DTS
+            // property/node names (e.g. linux,code and vendor,node).
+            // Recombine comma-separated identifier tokens only at the
+            // statement/name position; values are handled by until().
+            while(p+1<t.size()&&t[p]==","&&
+                  !std::isspace((unsigned char)t[p+1])&&
+                  t[p+1]!=";"&&t[p+1]!="="&&t[p+1]!="{"&&t[p+1]!="}") {
+                a+=","+t[p+1];
+                p+=2;
+            }
 
             std::string label;
             if(p<t.size()&&t[p]==":"){
