@@ -46,6 +46,9 @@ jobs:
           # Keep the embedded bridge header inside the MSYS2 tree so GCC's
           # generated Make dependency files never contain a Windows drive-letter colon.
           cp "$GITHUB_WORKSPACE/native/dtc_bridge.h" ./dtc_bridge.h
+          # The upstream helper is private to dtc.c; expose only that helper
+          # so the embedded bridge can reproduce the CLI check sequence.
+          sed -i 's/^static void fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c
           # Validate the exact native build path after the DTC object build.
           # Build only the DTC core objects and libfdt. The legacy convert-dtsv0
           # utility is not embedded and requires the POSIX fnmatch.h header,
