@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-$PWD}}"
+PROJECT_DIR="SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-$(dirname -- "$SCRIPT_DIR")}}""
 DTC_DIR="${2:-/tmp/gatito-dtb-pacher-dtc}"
 export PATH="/ucrt64/bin:/usr/bin:${PATH:-}"
 
