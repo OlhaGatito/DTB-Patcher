@@ -7,7 +7,6 @@ if [[ "$SCRIPT_DIR" != /* ]]; then
   SCRIPT_DIR="$PWD/$SCRIPT_DIR"
 fi
 PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-${SCRIPT_DIR%/native}}}"
-PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-$(dirname -- "$SCRIPT_DIR")}}""
 DTC_DIR="${2:-/tmp/gatito-dtb-pacher-dtc}"
 export PATH="/ucrt64/bin:/usr/bin:${PATH:-}"
 
