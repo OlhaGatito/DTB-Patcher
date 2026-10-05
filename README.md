@@ -18,6 +18,8 @@ Gatito Dtb Pacher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. 
 - Transferencia limitada a propriedades existentes e compativeis no Receptor.
 - Doador e Receptor nunca sao sobrescritos.
 - Geracao automatica de patch-001.dtb, patch-002.dtb e assim por diante.
+- Preview do DTS final completo antes da compilacao.
+- Log persistente em Documents/Gatito Dtb Pacher/Logs/.
 - Mascote Saruê do Gatito-Ports.
 - Documentacao de arquitetura, seguranca e contribuicao.
 
