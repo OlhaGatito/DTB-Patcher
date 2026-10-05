@@ -10,6 +10,15 @@ int main(int argc,char**argv){
     if(dtbp_dtc_compile(dts.string().c_str(),dtb.c_str())){std::fprintf(stderr,"%s\n",dtbp_dtc_error());return 3;}
     if(dtbp_dtc_decompile(dtb.c_str(),round.c_str())){std::fprintf(stderr,"%s\n",dtbp_dtc_error());return 4;}
     if(!std::filesystem::exists(dtb)||!std::filesystem::exists(round))return 5;
+
+    auto bad=(dts.parent_path()/"invalid-smoke.dts").string();
+    auto badOut=(out/"invalid.dtb").string();
+    int badRc=dtbp_dtc_compile(bad.c_str(),badOut.c_str());
+    if(badRc==0){
+        std::fprintf(stderr,"Invalid DTS unexpectedly compiled.\\n");
+        return 6;
+    }
+    std::printf("DTC fatal-error trap test OK: rc=%d\\n",badRc);
     std::printf("DTC native smoke test OK: %s\n",dtbp_dtc_version());
     return 0;
 }
