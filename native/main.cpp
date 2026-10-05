@@ -587,6 +587,10 @@ static void build(){
         logLine("DTC retornou sucesso. Validando arquivo de saida.");
         std::error_code ec;
         if(!fs::is_regular_file(out)||fs::file_size(out,ec)==0||ec){
+            logLine("VALIDACAO BASICA FALHOU: saida inexistente, vazia ou inacessivel.");
+            std::error_code rmec;
+            fs::remove(out,rmec);
+            if(rmec)logLine("Nao foi possivel remover a saida rejeitada: "+rmec.message());
             MessageBoxA(g_main,
                 "O DTC terminou, mas o DTB de saida nao passou na validacao basica.",
                 "Gerar novo DTB",MB_OK|MB_ICONERROR);
@@ -605,10 +609,14 @@ static void build(){
             std::string e=dtbp_dtc_error();
             if(e.empty())e="O DTB foi criado, mas nao pode ser lido novamente pelo DTC.";
             logLine("VALIDACAO FALHOU: "+e);
+            std::error_code rmec;
+            fs::remove(out,rmec);
+            if(rmec)logLine("Nao foi possivel remover o DTB reprovado: "+rmec.message());
+            else logLine("DTB reprovado removido da pasta de saida.");
             MessageBoxA(g_main,
-                (e+"\r\n\r\nO arquivo foi reprovado e nao deve ser usado no hardware.").c_str(),
+                (e+"\r\n\r\nO arquivo foi reprovado e removido.").c_str(),
                 "Falha na validacao",MB_OK|MB_ICONERROR);
-            setStatus("DTB reprovado na validacao. Nao use no hardware.");
+            setStatus("DTB reprovado e removido. Nao use no hardware.");
             return;
         }
 
@@ -1012,17 +1020,18 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
                     }
                 }
 
+                if(n->code==LVN_ITEMCHANGED){
+                    NMLISTVIEW* changed=(NMLISTVIEW*)l;
+                    if(changed->uChanged&LVIF_STATE){
+                        updatePreview();
+                    }
+                    break;
+                }
+
                 if(n->code==NM_CUSTOMDRAW){
                     NMLVCUSTOMDRAW* cd=(NMLVCUSTOMDRAW*)l;
                     if(cd->nmcd.dwDrawStage==CDDS_PREPAINT)
                         return CDRF_NOTIFYITEMDRAW;
-
-                    if(n->code==LVN_ITEMCHANGED){
-                        NMLISTVIEW* changed=(NMLISTVIEW*)l;
-                        if(changed->uChanged&LVIF_STATE){
-                            updatePreview();
-                        }
-                    }
 
                     if(cd->nmcd.dwDrawStage==CDDS_ITEMPREPAINT){
                         int row=(int)cd->nmcd.dwItemSpec;
