@@ -483,7 +483,8 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
    case ID_ANALYZE:analyze();break;
    case ID_BUILD:build();break;
    case ID_ABOUT:{
-    const char* msg="DTB-Patcher\r\n\r\nDoador -> analise -> selecao -> novo DTB.\r\n\r\nOs arquivos originais nunca sao sobrescritos.\r\nDTC integrado no mesmo processo.\r\n\r\nMascote: Sarue / Gatito-Ports.";\n    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
+    const char* msg="DTB-Patcher\r\n\r\nDoador -> analise -> selecao -> novo DTB.\r\n\r\nOs arquivos originais nunca sao sobrescritos.\r\nDTC integrado no mesmo processo.\r\n\r\nMascote: Sarue / Gatito-Ports.";
+    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
    }
   }break;
  case WM_DESTROY:PostQuitMessage(0);break;
