@@ -53,7 +53,7 @@ jobs:
           # Build only the DTC core objects and libfdt. The legacy convert-dtsv0
           # utility is not embedded and requires the POSIX fnmatch.h header,
           # which is not part of the UCRT64 target headers.
-          make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" \
+          make CONVERT_OBJS= NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" \
             checks.o data.o flattree.o fstree.o livetree.o srcpos.o treesource.o util.o \
             dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a
 
