@@ -44,8 +44,8 @@ int main(int argc,char** argv){
 
     const auto& gpio=receiver.children.at("gpio-keys").children.at("button-up")
                           .properties.at("gpios").value;
-    if(gpio.find("20")==std::string::npos){
-        std::fprintf(stderr,"receiver GPIO was not replaced: %s\n",gpio.c_str());
+    if(gpio.find("20")==std::string::npos||gpio.find("&gpio1")==std::string::npos){
+        std::fprintf(stderr,"receiver GPIO/phandle was not translated: %s\n",gpio.c_str());
         return 7;
     }
 
