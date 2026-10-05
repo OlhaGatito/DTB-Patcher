@@ -900,8 +900,8 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
         }
 
         case WM_PAINT:{
-            PAINTSTRUCT ps;
-            HDC dc=BeginPaint(h,&ps);
+            PAINTSTRUCT paint;
+            HDC dc=BeginPaint(h,&paint);
             RECT r{};
             GetClientRect(h,&r);
 
@@ -978,13 +978,13 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
             roundFill(g,pbr,ppn,24,previewTop,r.right-48,previewH,10.0f);
             FontFamily pff(L"Segoe UI");
             Font pt(&pff,13,FontStyleBold,UnitPixel);
-            Font ps(&pff,9,FontStyleRegular,UnitPixel);
+            Font previewFont(&pff,9,FontStyleRegular,UnitPixel);
             SolidBrush ptxt(Color(255,55,48,42)), pmut(Color(255,111,100,91));
             g.DrawString(L"Preview do DTS final",-1,&pt,PointF(40,(REAL)previewTop+8),&ptxt);
             g.DrawString(L"Receptor como base + blocos selecionados do Doador. O DTB sera compilado deste DTS.",
-                         -1,&ps,PointF(40,(REAL)previewTop+30),&pmut);
+                         -1,&previewFont,PointF(40,(REAL)previewTop+30),&pmut);
 
-            EndPaint(h,&ps);
+            EndPaint(h,&paint);
             return 0;
         }
 
