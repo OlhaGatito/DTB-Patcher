@@ -1,10 +1,21 @@
 /dts-v1/;
 
+/memreserve/ 0x0000000000001000 0x0000000000000100;
+
 / {
     compatible = "gatito_dtb_pacher,smoke";
     model = "gatito Native Smoke Test";
     #address-cells = <1>;
     #size-cells = <0>;
+
+    gpio0: gpio@0 {
+        phandle = <1>;
+        compatible = "gpio-test";
+    };
+
+    aliases {
+        gpio-test = &gpio0;
+    };
 
     subnode@1 {
         compatible = "native";
