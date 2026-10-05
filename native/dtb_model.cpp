@@ -538,7 +538,7 @@ bool render_dts(const DtbNode& root,const std::string& f){
     std::ofstream o(f,std::ios::binary);
     if(!o)return false;
     for(const auto& reserve:root.memreserve)
-        o<<reserve<<";";\n";
+        o<<reserve<<";\n";
     if(!root.memreserve.empty())o<<"\n";
 
     std::function<void(const DtbNode&,int)> render=[&](const DtbNode& n,int lv){
