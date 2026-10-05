@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_DIR="${SCRIPT_PATH%/*}"
+if [[ "$SCRIPT_DIR" != /* ]]; then
+  SCRIPT_DIR="$PWD/$SCRIPT_DIR"
+fi
+PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-${SCRIPT_DIR%/native}}}"
 SCRIPT_DIR="${SCRIPT_PATH%/*}"
 if [[ "$SCRIPT_DIR" != /* ]]; then
   SCRIPT_DIR="$PWD/$SCRIPT_DIR"
