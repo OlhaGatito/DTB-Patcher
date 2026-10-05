@@ -20,6 +20,12 @@
 #include <algorithm>
 #include <exception>
 #include <cstdio>
+#include <fstream>
+#include <chrono>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+#include <exception>
 #include "dtc_bridge.h"
 #include "dtb_model.hpp"
 
@@ -40,7 +46,7 @@ enum : int {
 static HWND g_main=nullptr;
 static HWND g_donor=nullptr,g_receiver=nullptr;
 static HWND g_donorInfo=nullptr,g_receiverInfo=nullptr;
-static HWND g_log=nullptr,g_status=nullptr;
+static HWND g_log=nullptr,g_status=nullptr,g_preview=nullptr;
 static HWND g_lists[5]{};
 static std::vector<DtbTransferItem> g_items;
 static DtbNode g_donor_tree,g_receiver_tree;
@@ -48,6 +54,7 @@ static ULONG_PTR g_gdiplus=0;
 static HFONT g_fonts[4]{};
 static HBRUSH g_whiteBrush=nullptr;
 static bool g_analyzed=false;
+static std::string g_logPath;
 
 static COLORREF bg(){return RGB(244,241,235);}
 static COLORREF card(){return RGB(255,253,249);}
@@ -73,7 +80,62 @@ static void setText(HWND h,const std::string& s){
     if(h)SetWindowTextA(h,s.c_str());
 }
 
+static std::string diagnosticsPath(){
+    try{
+        const char* home=std::getenv("USERPROFILE");
+        if(!home||!*home)return {};
+        fs::path dir=fs::path(home)/"Documents"/"Gatito Dtb Pacher"/"Logs";
+        std::error_code ec;
+        fs::create_directories(dir,ec);
+        if(ec)return {};
+        return (dir/"gatito-dtb-pacher.log").string();
+    }catch(...){return {};}
+}
+
+static std::string nowStamp(){
+    auto now=std::chrono::system_clock::now();
+    std::time_t tt=std::chrono::system_clock::to_time_t(now);
+    std::tm tm{};
+#ifdef _WIN32
+    localtime_s(&tm,&tt);
+#else
+    localtime_r(&tt,&tm);
+#endif
+    std::ostringstream o;
+    o<<std::put_time(&tm,"%Y-%m-%d %H:%M:%S");
+    return o.str();
+}
+
+static void fileLog(const std::string& s){
+    if(g_logPath.empty())g_logPath=diagnosticsPath();
+    if(g_logPath.empty())return;
+    std::ofstream o(g_logPath,std::ios::app);
+    if(o)o<<"["<<nowStamp()<<"] "<<s<<"\\n";
+}
+
 static void logLine(const std::string& s){
+    fileLog(s);
+    if(!g_log)return;
+    int n=GetWindowTextLengthA(g_log);
+    SendMessageA(g_log,EM_SETSEL,n,n);
+    std::string x=s+"\\r\\n";
+    SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
+}
+
+static LONG WINAPI gatitoUnhandledException(EXCEPTION_POINTERS* ep){
+    std::ostringstream o;
+    o<<"CRASH SEH code=0x"<<std::hex<<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionCode:0)
+     <<" address="<<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionAddress:nullptr);
+    fileLog(o.str());
+    fileLog("Process terminated by an unhandled Windows exception. Last safe step is recorded above.");
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+static void gatitoTerminate(){
+    fileLog("std::terminate() called.");
+    std::abort();
+}
+
     if(!g_log)return;
     int n=GetWindowTextLengthA(g_log);
     SendMessageA(g_log,EM_SETSEL,n,n);
@@ -122,6 +184,7 @@ static void chooseFile(HWND edit){
     if(GetOpenFileNameA(&o)){
         setText(edit,buf);
         g_analyzed=false;
+        if(g_preview)SetWindowTextA(g_preview,"DTB alterado. Analise novamente para atualizar o DTS final.");
         setStatus("DTB alterado. Analise novamente para atualizar a comparacao.");
     }
 }
@@ -133,6 +196,7 @@ static void swapFiles(){
     setText(g_receiverInfo,"Aguardando analise");
     g_analyzed=false;
     g_items.clear();
+    if(g_preview)SetWindowTextA(g_preview,"Doador e Receptor invertidos. Analise novamente.");
     for(auto lv:g_lists)if(lv)ListView_DeleteAllItems(lv);
     setStatus("Doador e receptor invertidos. Analise novamente.");
 }
@@ -246,6 +310,61 @@ static bool checkedCompatibleCount(int& selected){
         }
     }
     return selected>0;
+}
+
+static std::string readWholeFile(const std::string& path){
+    std::ifstream in(path,std::ios::binary);
+    if(!in)return {};
+    std::ostringstream s;s<<in.rdbuf();
+    return s.str();
+}
+
+static void updatePreview(){
+    if(!g_preview)return;
+    if(!g_analyzed){
+        SetWindowTextA(g_preview,
+            "Analise os dois DTBs para montar a pre-visualizacao.\\r\\n\\r\\n"
+            "O preview sempre usa o Receptor como base.");
+        return;
+    }
+    try{
+        DtbNode preview=g_receiver_tree;
+        int applied=0,skipped=0;
+        // Preview intentionally has no side effects: no output DTB and no log noise.
+        for(auto lv:g_lists){
+            if(!lv)continue;
+            int rows=ListView_GetItemCount(lv);
+            for(int row=0;row<rows;++row){
+                if(!ListView_GetCheckState(lv,row))continue;
+                LVITEMA it{};it.mask=LVIF_PARAM;it.iItem=row;
+                if(!ListView_GetItem(lv,&it))continue;
+                int idx=(int)it.lParam;
+                if(idx<0||idx>=(int)g_items.size())continue;
+                const auto& item=g_items[idx];
+                if(item.compatible && apply_transfer_item(preview,g_donor_tree,item))++applied;
+                else ++skipped;
+            }
+        }
+        std::string p=tempPath("preview.dts");
+        if(!render_dts(preview,p)){
+            SetWindowTextA(g_preview,"Falha ao montar o preview do DTS final.");
+            return;
+        }
+        std::string text=readWholeFile(p);
+        if(text.empty())text="O preview ficou vazio.";
+        std::string header="GATITO DTB PACHER — PREVIEW DO DTS FINAL\\r\\n"
+                           "Base: RECEPTOR | Blocos selecionados do DOADOR: "+
+                           std::to_string(applied)+"\\r\\n"
+                           "O arquivo binario sera compilado deste DTS.\\r\\n"
+                           "======================================================================\\r\\n\\r\\n";
+        SetWindowTextA(g_preview,(header+text).c_str());
+    }catch(const std::exception& e){
+        fileLog(std::string("PREVIEW ERROR: ")+e.what());
+        SetWindowTextA(g_preview,"Falha ao montar o preview do DTS final.");
+    }catch(...){
+        fileLog("PREVIEW ERROR: unknown exception.");
+        SetWindowTextA(g_preview,"Falha ao montar o preview do DTS final.");
+    }
 }
 
 static void analyze(){
@@ -405,6 +524,7 @@ static bool nextOutputPath(fs::path& out){
 
 static void build(){
     try{
+        logLine("BUILD START");
         if(!g_analyzed){
             analyze();
             if(!g_analyzed)return;
@@ -424,6 +544,7 @@ static void build(){
         logLine("Base: Receptor. As selecoes do Doador serao aplicadas por bloco.");
 
         DtbNode patched=g_receiver_tree;
+        logLine("Receptor copiado para a base do novo DTS.");
         int applied=0,skipped=0;
 
         if(!applySelected(patched,applied,skipped)||applied<=0){
@@ -446,6 +567,7 @@ static void build(){
         }
 
         std::string dts=tempPath("patched.dts");
+        logLine("Renderizando DTS final: "+dts);
         if(!render_dts(patched,dts)){
             MessageBoxA(g_main,
                 "Falha ao gerar o DTS intermediario.\r\n\r\n"
@@ -458,6 +580,7 @@ static void build(){
         logLine("DTS temporario criado a partir do Receptor.");
         setStatus("Compilando o novo DTS com o DTC integrado...");
 
+        logLine("Chamando DTC nativo para compilar: "+dts+" -> "+out.string());
         if(dtbp_dtc_compile(dts.c_str(),out.string().c_str())){
             std::string e=dtbp_dtc_error();
             logLine("Falha de compilacao: "+e);
@@ -467,6 +590,7 @@ static void build(){
             return;
         }
 
+        logLine("DTC retornou sucesso. Validando arquivo de saida.");
         std::error_code ec;
         if(!fs::is_regular_file(out)||fs::file_size(out,ec)==0||ec){
             MessageBoxA(g_main,
@@ -476,6 +600,7 @@ static void build(){
             return;
         }
 
+        logLine("Saida DTB valida em tamanho. Iniciando round-trip.");
         // Round-trip validation is mandatory before presenting success.
         setStatus("Validando o DTB gerado...");
         std::string verifyDts=tempPath("verify.dts");
@@ -494,6 +619,7 @@ static void build(){
         }
 
         logLine("Round-trip DTS -> DTB -> DTS: OK.");
+        updatePreview();
         logLine("Transferencias aplicadas: "+std::to_string(applied)+
                 " | ignoradas: "+std::to_string(skipped));
         logLine("Novo DTB: "+out.string());
@@ -501,6 +627,7 @@ static void build(){
         setStatus(std::to_string(applied)+
                   " bloco(s) transferido(s). DTB compilado e validado.");
 
+        logLine("BUILD SUCCESS: "+out.string());
         MessageBoxA(g_main,
             ("Novo DTB criado e validado:\r\n\r\n"+out.string()+
              "\r\n\r\nBase: Receptor\r\nBlocos aplicados do Doador: "+
@@ -683,7 +810,7 @@ static void layout(){
     GetClientRect(g_main,&r);
     int W=r.right,H=r.bottom;
     const int margin=24;
-    const int top=166;
+    const int top=220;
 
     // Top source cards.
     const int actionW=260;
@@ -708,8 +835,10 @@ static void layout(){
     MoveWindow(GetDlgItem(g_main,ID_BUILD),actionX,sourceY+72,actionW,38,TRUE);
 
     int cardTop=top;
-    int logH=78;
-    int cardBottom=H-logH-18;
+    int logH=72;
+    int previewH=220;
+    int previewTop=H-logH-previewH-24;
+    int cardBottom=previewTop-12;
     int cardArea=cardBottom-cardTop;
     if(cardArea<300)cardArea=300;
 
@@ -733,6 +862,8 @@ static void layout(){
         resizeListColumns(g_lists[i],cardW-16);
     }
 
+    int previewW=W-2*margin;
+    MoveWindow(g_preview,margin,previewTop,previewW,previewH,TRUE);
     int logY=H-logH+4;
     MoveWindow(g_log,margin,logY,W-2*margin-220,logH-8,TRUE);
     MoveWindow(g_status,W-margin-205,logY,205,logH-8,TRUE);
@@ -837,13 +968,27 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
             for(int i=0;i<5;i++){
                 int cardGap=12;
                 int cardW=(W-48-2*cardGap)/3;
-                int cardArea=r.bottom-166-78-18;
+                int cardArea=r.bottom-220-72-220-24-12;
                 if(cardArea<300)cardArea=300;
                 int rowH=(cardArea-cardGap)/2;
                 int x=(i<3)?24+i*(cardW+cardGap):24+(i-3)*(cardW+cardGap);
-                int y=(i<3)?166:166+rowH+cardGap;
+                int y=(i<3)?220:220+rowH+cardGap;
                 drawCard(g,x,y,cardW,rowH,i);
             }
+
+            // Final DTS preview panel.
+            int previewH=220;
+            int previewTop=r.bottom-72-previewH-24;
+            SolidBrush pbr(Color(255,255,253,249));
+            Pen ppn(Color(255,224,216,205),1.0f);
+            roundFill(g,pbr,ppn,24,previewTop,r.right-48,previewH,10.0f);
+            FontFamily pff(L"Segoe UI");
+            Font pt(&pff,13,FontStyleBold,UnitPixel);
+            Font ps(&pff,9,FontStyleRegular,UnitPixel);
+            SolidBrush ptxt(Color(255,55,48,42)), pmut(Color(255,111,100,91));
+            g.DrawString(L"Preview do DTS final",-1,&pt,PointF(40,(REAL)previewTop+8),&ptxt);
+            g.DrawString(L"Receptor como base + blocos selecionados do Doador. O DTB sera compilado deste DTS.",
+                         -1,&ps,PointF(40,(REAL)previewTop+30),&pmut);
 
             EndPaint(h,&ps);
             return 0;
@@ -877,6 +1022,13 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
                     NMLVCUSTOMDRAW* cd=(NMLVCUSTOMDRAW*)l;
                     if(cd->nmcd.dwDrawStage==CDDS_PREPAINT)
                         return CDRF_NOTIFYITEMDRAW;
+
+                    if(n->code==LVN_ITEMCHANGED){
+                        NMLISTVIEW* changed=(NMLISTVIEW*)l;
+                        if(changed->uChanged&LVIF_STATE){
+                            updatePreview();
+                        }
+                    }
 
                     if(cd->nmcd.dwDrawStage==CDDS_ITEMPREPAINT){
                         int row=(int)cd->nmcd.dwItemSpec;
@@ -960,7 +1112,13 @@ static HWND makeList(HWND parent,HINSTANCE hi,int id){
 
 int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
     try{
+        g_logPath=diagnosticsPath();
+        std::set_terminate(gatitoTerminate);
+        SetUnhandledExceptionFilter(gatitoUnhandledException);
+        fileLog("=== GATITO DTB PACHER START ===");
+        fileLog("PID="+std::to_string(GetCurrentProcessId()));
         GdiplusStartupInput gi;
+        fileLog("Inicializando GDI+ e controles Win32.");
         if(GdiplusStartup(&g_gdiplus,&gi,nullptr)!=Ok)return 1;
 
         INITCOMMONCONTROLSEX ic{
@@ -1047,6 +1205,14 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
         for(int i=0;i<5;i++)
             g_lists[i]=makeList(g_main,hi,ID_LIST_CONTROLS+i);
 
+        g_preview=CreateWindowA(
+            "EDIT",
+            "Analise os dois DTBs para montar a pre-visualizacao.",
+            WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|
+            ES_AUTOHSCROLL|ES_READONLY|WS_VSCROLL|WS_HSCROLL,
+            0,0,100,100,g_main,nullptr,hi,nullptr);
+        setFont(g_preview,10);
+
         g_log=CreateWindowA(
             "EDIT","Log de operacao:\r\n",
             WS_CHILD|WS_VISIBLE|WS_BORDER|
@@ -1061,6 +1227,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
             0,0,100,60,g_main,nullptr,hi,nullptr);
         setFont(g_status,9,true);
 
+        fileLog("Interface criada com sucesso.");
         ShowWindow(g_main,SW_SHOWMAXIMIZED);
         UpdateWindow(g_main);
         layout();
@@ -1071,6 +1238,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
             DispatchMessageA(&msg);
         }
 
+        fileLog("Aplicacao encerrada normalmente.");
         if(g_whiteBrush)DeleteObject(g_whiteBrush);
         GdiplusShutdown(g_gdiplus);
         return 0;
