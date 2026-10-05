@@ -88,7 +88,7 @@ int dtbp_dtc_compile(const char* dts_path,const char* dtb_path) {
     if(!dti){set_error("DTC could not parse the DTS.");dtbp_exit_active=0;return 1;}
 
     /* Match the upstream DTC CLI sequence: checks rely on basenamelen/fullpath. */
-    fill_fullpaths(dti->dt, "");
+    dtbp_fill_fullpaths(dti->dt, "");
     process_checks(false,dti);
 
     char tmp[4096];
