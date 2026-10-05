@@ -49,13 +49,23 @@ jobs:
           # The upstream helper is private to dtc.c; expose only that helper
           # so the embedded bridge can reproduce the CLI check sequence.
           sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c
-          # Validate the exact native build path after the DTC object build.
-          # Build only the DTC core objects and libfdt. The legacy convert-dtsv0
-          # utility is not embedded and requires the POSIX fnmatch.h header,
-          # which is not part of the UCRT64 target headers.
-          make CONVERT_OBJS= NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" \
-            checks.o data.o flattree.o fstree.o livetree.o srcpos.o treesource.o util.o \
-            dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a
+          # Do not invoke the deprecated upstream Makefile here: its default
+          # target graph always includes the legacy convert-dtsv0 utility.
+          # Generate and compile only the DTC core and libfdt objects needed
+          # by the embedded application.
+          bison -d -o dtc-parser.tab.c dtc-parser.y
+          flex -o dtc-lexer.lex.c dtc-lexer.l
+          for src in checks.c data.c flattree.c fstree.c livetree.c srcpos.c treesource.c util.c; do
+            obj="${src%.c}.o"
+            gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c "$src" -o "$obj"
+          done
+          gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-lexer.lex.c -o dtc-lexer.lex.o
+          gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-parser.tab.c -o dtc-parser.tab.o
+          for src in fdt.c fdt_ro.c fdt_wip.c fdt_sw.c fdt_rw.c fdt_strerror.c fdt_empty_tree.c fdt_addresses.c fdt_overlay.c fdt_check.c; do
+            obj="${src%.c}.o"
+            gcc -I. -Ilibfdt -c "libfdt/$src" -o "libfdt/$obj"
+          done
+          ar rcs libfdt/libfdt.a libfdt/*.o
 
       - name: Compile native Gatito Dtb Pacher
         shell: msys2 {0}
