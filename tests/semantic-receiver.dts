@@ -1,0 +1,24 @@
+/dts-v1/;
+
+/ {
+    compatible = "dtb-patcher,semantic-receiver";
+
+    gpio-keys {
+        button-up {
+            label = "UP";
+            gpios = <&gpio0 30 0>;
+            linux,code = <544>;
+        };
+
+        button-a {
+            label = "A";
+            gpios = <&gpio0 31 0>;
+            linux,code = <304>;
+        };
+    };
+
+    sound {
+        compatible = "simple-audio-card";
+        audio-routing = "RECEIVER_ROUTE";
+    };
+};
