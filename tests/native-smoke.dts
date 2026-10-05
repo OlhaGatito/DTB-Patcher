@@ -1,8 +1,8 @@
 /dts-v1/;
 
 / {
-    compatible = "dtb-patcher,smoke";
-    model = "DTB-Patcher Native Smoke Test";
+    compatible = "gatito-dtb-pacher,smoke";
+    model = "gatito-dtb-pacher Native Smoke Test";
 
     test-node {
         test-value = <0x12345678>;
