@@ -60,7 +60,8 @@ int dtbp_dtc_decompile(const char* dtb_path,const char* dts_path) {
     remove(tmp);
     snprintf(dtbp_active_tmp,sizeof(dtbp_active_tmp),"%s",tmp);
     FILE* out=fopen(tmp,"wb");
-    if(!out){set_error("Could not create DTS output.");dtbp_exit_active=0;return 2;}
+    if(!out){dtbp_active_tmp[0]=0;set_error("Could not create DTS output.");dtbp_exit_active=0;return 2;}
+    dtbp_active_out=out;
     dt_to_source(out,dti);
     fclose(out);dtbp_active_out=NULL;dtbp_active_tmp[0]=0;
 
