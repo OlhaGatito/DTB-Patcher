@@ -3,6 +3,12 @@
 / {
     compatible = "gatito-dtb-pacher,semantic-donor";
 
+    gpio0: gpio@0 {
+        phandle = <1>;
+        compatible = "test,gpio";
+        #gpio-cells = <2>;
+    };
+
     gpio-keys {
         button-up {
             label = "UP";
