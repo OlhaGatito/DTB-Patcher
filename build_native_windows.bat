@@ -36,6 +36,7 @@ if not defined MSYS2_ROOT (
 if not defined MSYS2_ROOT goto :error_msys2
 
 set "BASH=%MSYS2_ROOT%\usr\bin\bash.exe"
+for /f "delims=" %%U in ('"%BASH%" -lc "cygpath -u \"%PROJECT_DIR%\""') do set "PROJECT_DIR_UNIX=%%U"
 echo [OK] MSYS2 encontrado: %BASH%
 echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
@@ -67,7 +68,7 @@ echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && cp "$(cygpath -u '%PROJECT_DIR%')/native/dtc_bridge.h" ./dtc_bridge.h && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && bison -d -o dtc-parser.tab.c dtc-parser.y && flex -o dtc-lexer.lex.c dtc-lexer.l && for src in checks.c data.c flattree.c fstree.c livetree.c srcpos.c treesource.c util.c; do obj="${src%.c}.o"; gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c "$src" -o "$obj" || exit 1; done && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-lexer.lex.c -o dtc-lexer.lex.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-parser.tab.c -o dtc-parser.tab.o && for src in fdt.c fdt_ro.c fdt_wip.c fdt_sw.c fdt_rw.c fdt_strerror.c fdt_empty_tree.c fdt_addresses.c fdt_overlay.c fdt_check.c; do obj="${src%.c}.o"; gcc -I. -Ilibfdt -c "libfdt/$src" -o "libfdt/$obj" || exit 1; done && ar rcs libfdt/libfdt.a libfdt/*.o"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"%PROJECT_DIR_UNIX%\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && cp '%PROJECT_DIR_UNIX%/native/dtc_bridge.h' ./dtc_bridge.h && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && bison -d -o dtc-parser.tab.c dtc-parser.y && flex -o dtc-lexer.lex.c dtc-lexer.l && for src in checks.c data.c flattree.c fstree.c livetree.c srcpos.c treesource.c util.c; do obj=\"${src%.c}.o\"; gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c \"$src\" -o \"$obj\" || exit 1; done && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-lexer.lex.c -o dtc-lexer.lex.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-parser.tab.c -o dtc-parser.tab.o && for src in fdt.c fdt_ro.c fdt_wip.c fdt_sw.c fdt_rw.c fdt_strerror.c fdt_empty_tree.c fdt_addresses.c fdt_overlay.c fdt_check.c; do obj=\"${src%.c}.o\"; gcc -I. -Ilibfdt -c \"libfdt/$src\" -o \"libfdt/$obj\" || exit 1; done && ar rcs libfdt/libfdt.a libfdt/*.o"
 if errorlevel 1 goto :error_dtc
 
 echo.
