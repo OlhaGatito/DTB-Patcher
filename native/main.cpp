@@ -1212,6 +1212,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
             ES_AUTOHSCROLL|ES_READONLY|WS_VSCROLL|WS_HSCROLL,
             0,0,100,100,g_main,nullptr,hi,nullptr);
         setFont(g_preview,10);
+        SendMessageA(g_preview,EM_SETLIMITTEXT,(WPARAM)(8u*1024u*1024u),0);
 
         g_log=CreateWindowA(
             "EDIT","Log de operacao:\r\n",
