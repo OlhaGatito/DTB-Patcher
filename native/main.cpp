@@ -686,25 +686,26 @@ static void layout(){
     const int top=166;
 
     // Top source cards.
-    int sourceGap=16;
-    int sourceW=(W-margin*2-310-sourceGap)/2;
+    const int actionW=260;
+    const int sourceGap=14;
+    int sourceW=(W-margin*2-actionW-2*sourceGap)/2;
     if(sourceW<300)sourceW=300;
     int sourceY=124;
     int sourceH=78;
-    int actionX=margin+sourceW+sourceGap;
+    int receiverX=margin+sourceW+sourceGap;
+    int actionX=receiverX+sourceW+sourceGap;
 
     MoveWindow(g_donor,margin+18,sourceY+26,sourceW-116,32,TRUE);
     MoveWindow(GetDlgItem(g_main,ID_DONOR),margin+sourceW-88,sourceY+26,70,32,TRUE);
     MoveWindow(g_donorInfo,margin+18,sourceY+4,sourceW-36,18,TRUE);
 
-    MoveWindow(g_receiver,margin+sourceW+sourceGap+18,sourceY+26,sourceW-116,32,TRUE);
-    MoveWindow(GetDlgItem(g_main,ID_RECEIVER),
-               margin+sourceW+sourceGap+sourceW-88,sourceY+26,70,32,TRUE);
-    MoveWindow(g_receiverInfo,
-               margin+sourceW+sourceGap+18,sourceY+4,sourceW-36,18,TRUE);
+    MoveWindow(g_receiver,receiverX+18,sourceY+26,sourceW-116,32,TRUE);
+    MoveWindow(GetDlgItem(g_main,ID_RECEIVER),receiverX+sourceW-88,sourceY+26,70,32,TRUE);
+    MoveWindow(g_receiverInfo,receiverX+18,sourceY+4,sourceW-36,18,TRUE);
 
-    MoveWindow(GetDlgItem(g_main,ID_SWAP),actionX+10,sourceY+2,145,30,TRUE);
-    MoveWindow(GetDlgItem(g_main,ID_ANALYZE),actionX+10,sourceY+37,145,30,TRUE);
+    MoveWindow(GetDlgItem(g_main,ID_SWAP),actionX,sourceY+2,actionW,30,TRUE);
+    MoveWindow(GetDlgItem(g_main,ID_ANALYZE),actionX,sourceY+37,actionW,30,TRUE);
+    MoveWindow(GetDlgItem(g_main,ID_BUILD),actionX,sourceY+72,actionW,38,TRUE);
 
     int cardTop=top;
     int logH=78;
@@ -815,8 +816,9 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
 
             // Source card backgrounds.
             int W=r.right;
-            int sourceGap=16;
-            int sourceW=(W-24*2-310-sourceGap)/2;
+            const int sourceGap=14;
+            const int actionW=260;
+            int sourceW=(W-24*2-actionW-2*sourceGap)/2;
             if(sourceW<300)sourceW=300;
             int sy=124;
             SolidBrush sourceBr(Color(255,255,253,249));
@@ -984,16 +986,6 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
 
         if(!g_main)return 1;
 
-        HWND donorLabel=CreateWindowA(
-            "STATIC","Arquivo DTB do Doador",
-            WS_CHILD|WS_VISIBLE,0,0,180,20,g_main,nullptr,hi,nullptr);
-        HWND receiverLabel=CreateWindowA(
-            "STATIC","Arquivo DTB do Receptor",
-            WS_CHILD|WS_VISIBLE,0,0,180,20,g_main,nullptr,hi,nullptr);
-
-        setFont(donorLabel,10,true);
-        setFont(receiverLabel,10,true);
-
         g_donor=CreateWindowA(
             "EDIT","",
             WS_CHILD|WS_VISIBLE|WS_BORDER|ES_AUTOHSCROLL,
@@ -1068,10 +1060,6 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
             WS_CHILD|WS_VISIBLE|SS_CENTER,
             0,0,100,60,g_main,nullptr,hi,nullptr);
         setFont(g_status,9,true);
-
-        // The action button is intentionally below the two source selectors,
-        // not mixed into either DTB path field.
-        MoveWindow(bu,0,0,180,36,TRUE);
 
         ShowWindow(g_main,SW_SHOWMAXIMIZED);
         UpdateWindow(g_main);
