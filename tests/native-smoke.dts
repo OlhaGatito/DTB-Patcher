@@ -1,10 +1,14 @@
 /dts-v1/;
 
 / {
-    compatible = "gatito-dtb-pacher,smoke";
-    model = "gatito-dtb-pacher Native Smoke Test";
+    compatible = "gatito_dtb_pacher,smoke";
+    model = "gatito Native Smoke Test";
+    #address-cells = <1>;
+    #size-cells = <0>;
 
-    testnode {
+    subnode@1 {
+        compatible = "native";
+        reg = <1>;
         test-value = <0x12345678>;
         test-string = "native";
     };
