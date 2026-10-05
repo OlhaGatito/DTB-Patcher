@@ -1,161 +1,93 @@
-# Gatito Dtb Pacher
+# 🚀 Gatito DTB‑Patcher
 
-**Analise, compare e gere novos Device Tree Blobs com controle explicito sobre cada transferencia.**
+> **Analise, compare e gere novos Device Tree Blobs** com total controle sobre cada transferência.
 
-Gatito Dtb Pacher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O projeto trabalha com **Doador -> Receptor -> Patch**, mantendo os arquivos originais intactos.
+![Saruê mascot](assets/sarue.svg)
 
-![Saruê](assets/sarue.svg)
+---
 
-## ✨ Destaques
+## ✨ Principais recursos
 
-- GUI nativa para Windows.
-- Migracao para C++/Win32.
-- Device Tree Compiler integrado ao processo.
-- Nenhum dtc.exe externo exigido pelo aplicativo final.
-- Comparacao funcional entre DTBs, organizada por Controles, Audio, Display, Energia e Outros.
-- Doador e Receptor exibidos lado a lado em cada bloco.
-- Selecao individual somente do lado do Doador.
-- Transferencia limitada a propriedades existentes e compativeis no Receptor.
-- Doador e Receptor nunca sao sobrescritos.
-- Geracao automatica de patch-001.dtb, patch-002.dtb e assim por diante.
-- Preview do DTS final completo antes da compilacao.
-- Log persistente em Documents/Gatito Dtb Pacher/Logs/.
-- Mascote Saruê do Gatito-Ports.
-- Documentacao de arquitetura, seguranca e contribuicao.
+| ✅ | Recurso |
+|----|---------|
+| 🪟 **GUI nativa Windows** (Win32 + GDI+) |
+| 🛠️ **Device Tree Compiler embutido** – nada de `dtc.exe` externo |
+| 🔍 **Comparação visual por categoria** (Controles, Áudio, Display, Energia, Outros) |
+| 📄 **Preview completo do DTS** antes da compilação |
+| 📁 **Logs permanentes** em `Documents/Gatito Dtb Patcher/Logs/` |
+| 📦 **Geração automática de patches numerados** (`patch‑001.dtb`, `patch‑002.dtb`, …) |
+| 🎯 **Transferência auditável** – veja caminho, tipo, categoria e motivo antes de aplicar |
 
-## 🧭 Como funciona
+---
 
-    DTB Doador
-         |
-         v
-    DTC nativo -> estrutura DTS
-         |
-         +---- comparar ----+
-         |                  |
-         v                  v
-    Blocos funcionais  DTB Receptor
-         |                   |
-         +-- selecao --------+
-                  |
-                  v
-          Receptor como base
-                  |
-                  v
-          Substituicao dos blocos
-                  |
-                  v
-              Novo DTB
-         |
-         v
-    Documents/Gatito Dtb Pacher/New dtb/
+## 📦 Instalação (usuário final)
 
-O objetivo e tornar a transferencia auditavel: o usuario consegue ver o caminho, tipo, categoria e motivo de cada diferenca antes de gerar o arquivo.
+1. Baixe o **executável** da última *release* (arquivo `.exe`).
+2. Execute‑o – não precisa instalar **Python, MinGW, GCC, MSYS2, Flex/Bison** ou `dtc`.
+3. Na primeira execução, o programa cria `Documents/Gatito Dtb Patcher/` com as pastas de **logs**, **novos DTBs** e **DTBs de referência**.
 
-## 🖥️ Distribuicao
+> 📋 Todos os detalhes técnicos (build, contribuição, segurança, licenças) estão no repositório **`Main`**.
 
-A versao final sera distribuida como um executavel Windows pronto para uso.
+---
 
-O usuario final nao deve precisar instalar:
+## 🛠️ Como funciona (resumido)
 
-- Python;
-- PyInstaller;
-- GCC;
-- MinGW;
-- MSYS2;
-- Flex/Bison;
-- dtc.exe.
+```
+DTB Doador → DTC nativo → DTS (descompactado)
+         → comparação por blocos funcionais →
+DTB Receptor (base) → substituição de props →
+preview DTS → compilação → novo DTB
+```
 
-Essas ferramentas pertencem ao ambiente de build.
+- **Nenhum arquivo original é sobrescrito** – Doador e Receptor permanecem intactos.
+- **Geração automática** de patches numerados.
+- **Validação round‑trip** (DTS → DTB → DTS idêntico?).
 
-## 🧩 Arquitetura nativa
+---
 
-A implementacao nativa concentra a migracao:
+## 🎯 Fluxo típico
 
-    native/
-    ├── main.cpp
-    ├── dtb_model.cpp
-    ├── dtb_model.hpp
-    ├── dtc_bridge.c
-    └── dtc_bridge.h
+1. Abra a GUI.
+2. Selecione **DTB Doador** (onde você busca as props novas).
+3. Selecione **DTB Receptor** (a base que será alterada).
+4. O programa lista as diferenças por **categoria** (GPIO, Áudio, Display, etc).
+5. **Selecione explicitamente** quais blocos do Doador você quer transferir para o Receptor.
+6. **Preview** do DTS final.
+7. **Gere** o novo DTB com um clique.
+8. Resultado salvo em `Documents/Gatito Dtb Patcher/New dtb/patch‑001.dtb`.
 
-O DTC oficial e compilado durante o build e ligado ao aplicativo. A aplicacao chama o codigo do compilador no mesmo processo.
+---
 
-A interface usa Win32 e GDI+ para manter a distribuicao simples e nativa.
+## 📚 Documentação e contribuição
 
-## 🎨 Saruê / Gatito-Ports
+| 📖 Documento | Localização |
+|-------------|------------|
+| 🏗️ Arquitetura nativa | `Main/docs/DTB-PATCHER-ARCHITECTURE.md` |
+| 📖 Guia de contribuição | `Main/CONTRIBUTING.md` |
+| 🔐 Segurança e boas práticas | `Main/SECURITY.md` |
+| 📦 Licença do DTC (GPL‑2.0‑or‑later) | `Main/tools/DTC-LICENSE.txt` |
+| 📄 Histórico de mudanças | `Main/CHANGELOG.md` |
 
-A identidade visual usa o Saruê do projeto Gatito-Ports.
+---
 
-Gatito-Ports:
-https://github.com/OlhaGatito/Gatito-Ports
+## 🧑‍💻 Como contribuir
 
-O vetor original utilizado pelo Gatito Dtb Pacher esta em:
+1. **Fork** do repositório **`Main`** (código‑fonte).
+2. Implemente correções ou novas funcionalidades.
+3. Abra *pull‑request* descrevendo as mudanças.
+4. Se o CI validar, uma nova *release* será publicada aqui, pronta para download.
 
-    assets/sarue.svg
+---
 
-## 🛡️ Filosofia de seguranca
+## ⚖️ Licença
 
-**Nunca editar sem entender.**
+O código incorpora o **Device Tree Compiler (DTC)** sob **GPL‑2.0‑or‑later**.  
+Consulte `Main/tools/DTC-LICENSE.txt` para detalhes.
 
-O projeto segue estas regras:
+---
 
-1. Inspecionar antes de modificar.
-2. Comparar estruturalmente.
-3. Exigir selecao explicita.
-4. Gerar um novo DTB.
-5. Preservar Doador e Receptor.
-6. Manter backups e resultados numerados.
-7. Validar o resultado antes de usa-lo no hardware.
+### 🎉 Pronto para patchar!
 
-Um DTB incorreto pode impedir o boot ou alterar configuracoes de hardware. Por isso, resultados ainda devem ser considerados artefatos de teste ate serem validados no dispositivo.
+Baixe, execute e comece a gerar seus DTBs com confiança. 💾
 
-## 🔬 Validacao
-
-As areas prioritarias sao:
-
-- phandles;
-- GPIO/pinctrl;
-- audio-routing;
-- display/backlight;
-- propriedades binarias;
-- strings multiplas;
-- /bits/;
-- /memreserve/;
-- nos com unit address;
-- labels;
-- referencias por caminho;
-- round-trip DTS -> DTB -> DTS;
-- geracao repetida de patches.
-
-## 📚 Documentacao
-
-- ABOUT.md — historia, arquitetura e identidade do projeto.
-- CONTRIBUTING.md — regras para contribuicao.
-- SECURITY.md — seguranca e cuidados com DTBs.
-- THIRD-PARTY-NOTICES.md — componentes e ativos de terceiros.
-- CHANGELOG.md — historico de mudancas.
-- tools/DTC-LICENSE.txt — licenca do DTC.
-
-## 🏗️ Build
-
-GitHub Actions:
-
-    .github/workflows/build-native-windows.yml
-
-Build local:
-
-    build_native_windows.bat
-
-O build de producao baixa o codigo-fonte oficial do DTC, compila os componentes nativos e produz o executavel.
-
-## ⚖️ Licenciamento
-
-O Gatito Dtb Pacher incorpora codigo do Device Tree Compiler (DTC), distribuido sob GPL-2.0-or-later.
-
-Consulte THIRD-PARTY-NOTICES.md e tools/DTC-LICENSE.txt antes de redistribuir builds que incorporem o DTC.
-
-## 📌 Status
-
-**Implementacao nativa em C++ em validacao.**
-
-A implementacao Python foi removida do codigo ativo. O fluxo suportado e o executavel nativo, com o DTC integrado no mesmo processo. O executavel ainda deve ser validado com DTBs reais antes de ser considerado pronto para uso em hardware.
+```
