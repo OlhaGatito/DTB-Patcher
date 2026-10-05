@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <map>
 #include <exception>
+#include <sstream>
 #include "dtc_bridge.h"
 #include "dtb_model.hpp"
 
@@ -85,7 +86,7 @@ static size_t countNodes(const DtbNode& n){
 static std::string tempPath(const char* n){
  try{
   fs::path p=fs::temp_directory_path();
-  return (p/("dtbp_"+std::string(n))).string();
+  return (p/("dtbp_"+std::to_string(GetCurrentProcessId())+"_"+std::string(n))).string();
  }catch(...){
   return std::string("dtbp_")+n;
  }
@@ -290,9 +291,23 @@ static void build(){
    return;
   }
 
+  // Round-trip: reabre o DTB criado com o mesmo DTC integrado.
+  // Isso evita apresentar um arquivo corrompido ou estruturalmente ilegivel como sucesso.
+  std::string verifyDts=tempPath("verify.dts");
+  DtbNode verifyTree;
+  if(dtbp_dtc_decompile(out.string().c_str(),verifyDts.c_str())||!parse_dts_file(verifyDts,verifyTree)){
+   std::string e=dtbp_dtc_error();
+   if(e.empty())e="O DTB foi criado, mas falhou na validacao de leitura pelo DTC nativo.";
+   logLine("VALIDACAO FALHOU: "+e);
+   MessageBoxA(g_main,e.c_str(),"Falha na validacao do novo DTB",MB_ICONERROR);
+   setStatus("DTB gerado, mas reprovado na validacao. Nao use no hardware.");
+   return;
+  }
+
+  logLine("Validacao round-trip concluida: DTB pode ser lido novamente.");
   logLine("Novo DTB gerado: "+out.string());
-  setStatus(std::to_string(applied)+" transferencia(s) aplicada(s).");
-  MessageBoxA(g_main,out.string().c_str(),"DTB criado com sucesso",MB_ICONINFORMATION);
+  setStatus(std::to_string(applied)+" transferencia(s) aplicada(s). DTB validado.");
+  MessageBoxA(g_main,out.string().c_str(),"DTB criado e validado com sucesso",MB_ICONINFORMATION);
  }catch(const std::exception& e){
   logLine(std::string("ERRO AO GERAR: ")+e.what());
   MessageBoxA(g_main,e.what(),"Erro ao gerar novo DTB",MB_ICONERROR);
