@@ -67,7 +67,7 @@ echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && export C_INCLUDE_PATH=$(cygpath -u '%PROJECT_DIR%')/native && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" dtc libfdt"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && export C_INCLUDE_PATH=$(cygpath -u '%PROJECT_DIR%')/native && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" checks.o data.o flattree.o fstree.o srcpos.o treesource.o util.o dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a"
 if errorlevel 1 goto :error_dtc
 
 echo.
@@ -76,7 +76,7 @@ echo.
 echo [2/3] Compilando o Gatito Dtb Pacher...
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf build && mkdir -p build && gcc -Dmain=dtc_internal_main -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c /tmp/gatito-dtb-pacher-dtc/dtc.c -o build/dtc_embedded.o && gcc -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c native/dtc_bridge.c -o build/dtc_bridge.o && g++ -std=c++17 -O2 -mwindows -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o /tmp/gatito-dtb-pacher-dtc/checks.o /tmp/gatito-dtb-pacher-dtc/data.o /tmp/gatito-dtb-pacher-dtc/flattree.o /tmp/gatito-dtb-pacher-dtc/fstree.o /tmp/gatito-dtb-pacher-dtc/livetree.o /tmp/gatito-dtb-pacher-dtc/srcpos.o /tmp/gatito-dtb-pacher-dtc/treesource.o /tmp/gatito-dtb-pacher-dtc/util.o /tmp/gatito-dtb-pacher-dtc/dtc-lexer.lex.o /tmp/gatito-dtb-pacher-dtc/dtc-parser.tab.o /tmp/gatito-dtb-pacher-dtc/libfdt/libfdt.a -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf build && mkdir -p build && gcc -Dmain=dtc_internal_main -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c /tmp/gatito-dtb-pacher-dtc/dtc.c -o build/dtc_embedded.o && gcc -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c native/dtc_bridge.c -o build/dtc_bridge.o && g++ -std=c++17 -O2 -mwindows -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o /tmp/gatito-dtb-pacher-dtc/checks.o /tmp/gatito-dtb-pacher-dtc/data.o /tmp/gatito-dtb-pacher-dtc/flattree.o /tmp/gatito-dtb-pacher-dtc/fstree.o /tmp/gatito-dtb-pacher-dtc/livetree.o /tmp/gatito-dtb-pacher-dtc/srcpos.o /tmp/gatito-dtb-pacher-dtc/treesource.o /tmp/gatito-dtb-pacher-dtc/util.o /tmp/gatito-dtb-pacher-dtc/dtc-lexer.lex.o /tmp/gatito-dtb-pacher-dtc/dtc-parser.tab.o /tmp/gatito-dtb-pacher-dtc/libfdt/libfdt.a -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe"
 if errorlevel 1 goto :error_compile
 
 if not exist "build\Gatito-Dtb-Pacher.exe" goto :error_missing
