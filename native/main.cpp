@@ -533,7 +533,7 @@ static bool nextOutputPath(fs::path& out){
     if(ec)return false;
 
     for(int n=1;n<100000;n++){
-        fs::path candidate=dir/("patch-"+std::to_string(n)+".dtb");
+        fs::path candidate=dir/("patch-"+(std::ostringstream{}<<std::setw(3)<<std::setfill('0')<<n).str()+".dtb");
         if(!fs::exists(candidate,ec)&&!ec){
             out=candidate;
             return true;
