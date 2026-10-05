@@ -114,9 +114,17 @@ static void fileLog(const std::string& s){
 
 static void logLine(const std::string& s){
     fileLog(s);
+    if(!g_log)return;
+    int n=GetWindowTextLengthA(g_log);
+    SendMessageA(g_log,EM_SETSEL,n,n);
+    std::string x=s+"\r\n";
+    SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
+}
+
 static LONG WINAPI gatitoUnhandledException(EXCEPTION_POINTERS* ep){
     std::ostringstream o;
-    o<<"CRASH SEH code=0x"<<std::hex<<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionCode:0)
+    o<<"CRASH SEH code=0x"<<std::hex
+     <<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionCode:0)
      <<" address="<<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionAddress:nullptr);
     fileLog(o.str());
     fileLog("Process terminated by an unhandled Windows exception. Last safe step is recorded above.");
@@ -126,13 +134,6 @@ static LONG WINAPI gatitoUnhandledException(EXCEPTION_POINTERS* ep){
 static void gatitoTerminate(){
     fileLog("std::terminate() called.");
     std::abort();
-}
-
-    if(!g_log)return;
-    int n=GetWindowTextLengthA(g_log);
-    SendMessageA(g_log,EM_SETSEL,n,n);
-    std::string x=s+"\r\n";
-    SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
 }
 
 static void setStatus(const std::string& s){
