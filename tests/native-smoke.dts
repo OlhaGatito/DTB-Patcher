@@ -4,7 +4,7 @@
     compatible = "gatito-dtb-pacher,smoke";
     model = "gatito-dtb-pacher Native Smoke Test";
 
-    test-node {
+    testnode {
         test-value = <0x12345678>;
         test-string = "native";
     };
