@@ -1,8 +1,8 @@
-# DTB-Patcher
+# Gatito Dtb Pacher
 
 **Analise, compare e gere novos Device Tree Blobs com controle explicito sobre cada transferencia.**
 
-DTB-Patcher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O projeto trabalha com **Doador -> Receptor -> Patch**, mantendo os arquivos originais intactos.
+Gatito Dtb Pacher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O projeto trabalha com **Doador -> Receptor -> Patch**, mantendo os arquivos originais intactos.
 
 ![Saruê](assets/sarue.svg)
 
@@ -45,7 +45,7 @@ DTB-Patcher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O proj
               Novo DTB
          |
          v
-    Documents/DTB-Patcher/New dtb/
+    Documents/Gatito Dtb Pacher/New dtb/
 
 O objetivo e tornar a transferencia auditavel: o usuario consegue ver o caminho, tipo, categoria e motivo de cada diferenca antes de gerar o arquivo.
 
@@ -87,7 +87,7 @@ A identidade visual usa o Saruê do projeto Gatito-Ports.
 Gatito-Ports:
 https://github.com/OlhaGatito/Gatito-Ports
 
-O vetor original utilizado pelo DTB-Patcher esta em:
+O vetor original utilizado pelo Gatito Dtb Pacher esta em:
 
     assets/sarue.svg
 
@@ -148,7 +148,7 @@ O build de producao baixa o codigo-fonte oficial do DTC, compila os componentes 
 
 ## ⚖️ Licenciamento
 
-O DTB-Patcher incorpora codigo do Device Tree Compiler (DTC), distribuido sob GPL-2.0-or-later.
+O Gatito Dtb Pacher incorpora codigo do Device Tree Compiler (DTC), distribuido sob GPL-2.0-or-later.
 
 Consulte THIRD-PARTY-NOTICES.md e tools/DTC-LICENSE.txt antes de redistribuir builds que incorporem o DTC.
 
