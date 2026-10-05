@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <set>
 #include <cstdlib>
+#include <functional>
 
 namespace {
 
@@ -467,7 +468,6 @@ void addFunctionalItems(const DtbNode& donor,const DtbNode& receiver,const std::
                 blockSummary(*r,common,false);
             item.propertyNames=std::move(common);
         }
-        item.propertyNames=std::move(item.propertyNames);
         out.push_back(std::move(item));
     }
 }
