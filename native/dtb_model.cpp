@@ -416,8 +416,9 @@ void addControlItems(const DtbNode& donor,const DtbNode& receiver,std::vector<Dt
                     item.compatible=false;
                     item.receiverValue="Propriedade GPIO nao encontrada";
                 }else{
-                    item.compatible=true;
                     item.receiverValue=gpioSummary(propValue(*r,p));
+                    item.compatible=(propValue(*n,p)!=propValue(*r,p));
+                    if(!item.compatible)continue; // no visible row for an unchanged control
                 }
             }
             out.push_back(std::move(item));
@@ -461,10 +462,14 @@ void addFunctionalItems(const DtbNode& donor,const DtbNode& receiver,const std::
             const DtbNode* r=rit->second;
             item.receiverPath=r->path;
             std::vector<std::string> common;
-            for(const auto& p:props)if(r->properties.count(p))common.push_back(p);
+            for(const auto& p:props){
+                auto ri=r->properties.find(p);
+                if(ri!=r->properties.end()&&ri->second.value!=n->properties.at(p).value)
+                    common.push_back(p);
+            }
             item.compatible=!common.empty();
             item.receiverValue=common.empty()?
-                "Nenhuma propriedade compativel encontrada":
+                "Sem diferenca transferivel":
                 blockSummary(*r,common,false);
             item.propertyNames=std::move(common);
         }
