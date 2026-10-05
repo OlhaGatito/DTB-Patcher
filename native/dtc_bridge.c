@@ -16,12 +16,16 @@
 static char last_error[2048];
 static jmp_buf dtbp_exit_env;
 static volatile int dtbp_exit_active=0;
+static FILE* dtbp_active_out=NULL;
+static char dtbp_active_tmp[4096];
 
 /* DTC fatal helpers call exit(). In the standalone CLI that is fine; inside
  * Gatito Dtb Pacher it would terminate the GUI. The native build compiles
  * DTC with -Dexit=dtbp_dtc_exit so fatal DTC paths return here. */
 void dtbp_dtc_exit(int status){
     if(dtbp_exit_active){
+        if(dtbp_active_out){fclose(dtbp_active_out);dtbp_active_out=NULL;}
+        if(dtbp_active_tmp[0]){remove(dtbp_active_tmp);dtbp_active_tmp[0]=0;}
         snprintf(last_error,sizeof(last_error),
                  "DTC abortou a operacao (exit status %d). Consulte o log para a etapa exata.",status);
         longjmp(dtbp_exit_env,1);
@@ -54,10 +58,11 @@ int dtbp_dtc_decompile(const char* dtb_path,const char* dts_path) {
     char tmp[4096];
     snprintf(tmp,sizeof(tmp),"%s.gatito-tmp",dts_path);
     remove(tmp);
+    snprintf(dtbp_active_tmp,sizeof(dtbp_active_tmp),"%s",tmp);
     FILE* out=fopen(tmp,"wb");
     if(!out){set_error("Could not create DTS output.");dtbp_exit_active=0;return 2;}
     dt_to_source(out,dti);
-    fclose(out);
+    fclose(out);dtbp_active_out=NULL;dtbp_active_tmp[0]=0;
 
     if(rename(tmp,dts_path)!=0){
         remove(tmp);
@@ -86,11 +91,13 @@ int dtbp_dtc_compile(const char* dts_path,const char* dtb_path) {
     char tmp[4096];
     snprintf(tmp,sizeof(tmp),"%s.gatito-tmp",dtb_path);
     remove(tmp);
+    snprintf(dtbp_active_tmp,sizeof(dtbp_active_tmp),"%s",tmp);
     FILE* out=fopen(tmp,"wb");
-    if(!out){set_error("Could not create DTB output.");dtbp_exit_active=0;return 2;}
+    if(!out){dtbp_active_tmp[0]=0;set_error("Could not create DTB output.");dtbp_exit_active=0;return 2;}
+    dtbp_active_out=out;
 
     dt_to_blob(out,dti,DEFAULT_FDT_VERSION);
-    fclose(out);
+    fclose(out);dtbp_active_out=NULL;dtbp_active_tmp[0]=0;
 
     if(rename(tmp,dtb_path)!=0){
         remove(tmp);
