@@ -6,11 +6,14 @@
 struct DtbProperty {
     std::string name;
     std::string value;
+    std::string label;
 };
 
 struct DtbNode {
     std::string name;
     std::string path;
+    std::string label;
+    std::vector<std::string> memreserve;
     std::map<std::string,DtbProperty> properties;
     std::map<std::string,DtbNode> children;
 };
