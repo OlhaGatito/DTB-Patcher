@@ -25,7 +25,6 @@
 #include <ctime>
 #include <sstream>
 #include <iomanip>
-#include <exception>
 #include "dtc_bridge.h"
 #include "dtb_model.hpp"
 
@@ -110,18 +109,11 @@ static void fileLog(const std::string& s){
     if(g_logPath.empty())g_logPath=diagnosticsPath();
     if(g_logPath.empty())return;
     std::ofstream o(g_logPath,std::ios::app);
-    if(o)o<<"["<<nowStamp()<<"] "<<s<<"\\n";
+    if(o)o<<"["<<nowStamp()<<"] "<<s<<"\n";
 }
 
 static void logLine(const std::string& s){
     fileLog(s);
-    if(!g_log)return;
-    int n=GetWindowTextLengthA(g_log);
-    SendMessageA(g_log,EM_SETSEL,n,n);
-    std::string x=s+"\\r\\n";
-    SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
-}
-
 static LONG WINAPI gatitoUnhandledException(EXCEPTION_POINTERS* ep){
     std::ostringstream o;
     o<<"CRASH SEH code=0x"<<std::hex<<(ep&&ep->ExceptionRecord?ep->ExceptionRecord->ExceptionCode:0)
