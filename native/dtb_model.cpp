@@ -84,6 +84,14 @@ struct Parser{
 
             std::string a=t[p++];
 
+            std::string label;
+            if(p<t.size()&&t[p]==":"){
+                label=a;
+                ++p;
+                if(p>=t.size())return false;
+                a=t[p++];
+            }
+
             if(a=="/dts-v1/"||a=="/plugin/"){
                 while(p<t.size()&&t[p]!=";")++p;
                 if(p<t.size())++p;
@@ -97,16 +105,10 @@ struct Parser{
                     v+=t[p++];
                 }
                 if(p<t.size())++p;
+                if(!label.empty())v=label+": /memreserve/ "+v;
+                else v="/memreserve/ "+v;
                 n.memreserve.push_back(v);
                 continue;
-            }
-
-            std::string label;
-            if(p<t.size()&&t[p]==":"){
-                label=a;
-                ++p;
-                if(p>=t.size())return false;
-                a=t[p++];
             }
 
             if(p<t.size()&&t[p]=="{"){
@@ -536,7 +538,7 @@ bool render_dts(const DtbNode& root,const std::string& f){
     std::ofstream o(f,std::ios::binary);
     if(!o)return false;
     for(const auto& reserve:root.memreserve)
-        o<<"/memreserve/ "<<reserve<<";\n";
+        o<<reserve<<";";\n";
     if(!root.memreserve.empty())o<<"\n";
 
     std::function<void(const DtbNode&,int)> render=[&](const DtbNode& n,int lv){
