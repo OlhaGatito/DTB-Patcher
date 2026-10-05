@@ -257,14 +257,14 @@ static void build(){
   std::error_code ec;
   fs::create_directories(dir,ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\\r\\n"+dir.string()+"\\r\\n\\r\\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\r\n"+dir.string()+"\r\n\r\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
   int n=1;fs::path out;
   do{out=dir/("patch-"+std::to_string(n++)+".dtb");}while(fs::exists(out,ec)&&!ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\\r\\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\r\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
@@ -308,7 +308,7 @@ static void build(){
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }catch(...){
   logLine("ERRO AO GERAR: excecao desconhecida.");
-  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\\r\\n\\r\\nOs arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
+  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\r\n\r\nOs arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }
 }
@@ -483,7 +483,7 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
    case ID_ANALYZE:analyze();break;
    case ID_BUILD:build();break;
    case ID_ABOUT:{
-    const char* msg="DTB-Patcher\\r\\n\\r\\nDoador -> analise -> selecao -> novo DTB.\\r\\n\\r\\nOs arquivos originais nunca sao sobrescritos.\\r\\nDTC integrado no mesmo processo.\\r\\n\\r\\nMascote: Sarue / Gatito-Ports.";\n    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
+    const char* msg="DTB-Patcher\r\n\r\nDoador -> analise -> selecao -> novo DTB.\r\n\r\nOs arquivos originais nunca sao sobrescritos.\r\nDTC integrado no mesmo processo.\r\n\r\nMascote: Sarue / Gatito-Ports.";\n    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
    }
   }break;
  case WM_DESTROY:PostQuitMessage(0);break;
@@ -545,7 +545,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
 
   for(int i=0;i<5;i++)g_lists[i]=makeList(g_main,hi,ID_LIST_CONTROLS+i);
 
-  g_log=CreateWindowA("EDIT","Log de operacao:\\r\\n",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
+  g_log=CreateWindowA("EDIT","Log de operacao:\r\n",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_log,9);
   g_status=CreateWindowA("STATIC","Pronto. Selecione os dois DTBs para comecar.",WS_CHILD|WS_VISIBLE|SS_CENTER,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_status,9,true);
