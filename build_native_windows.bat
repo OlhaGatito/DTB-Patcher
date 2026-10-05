@@ -67,7 +67,7 @@ echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && cp "$(cygpath -u '%PROJECT_DIR%')/native/dtc_bridge.h" ./dtc_bridge.h && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" checks.o data.o flattree.o fstree.o srcpos.o treesource.o util.o dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && cp $(cygpath -u '%PROJECT_DIR%')/native/dtc_bridge.h ./dtc_bridge.h && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include dtc_bridge.h" checks.o data.o flattree.o fstree.o livetree.o srcpos.o treesource.o util.o dtc-lexer.lex.o dtc-parser.tab.o libfdt/libfdt.a"
 if errorlevel 1 goto :error_dtc
 
 echo.
@@ -87,6 +87,12 @@ echo.
 "%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && test -s build/Gatito-Dtb-Pacher.exe"
 if errorlevel 1 goto :error_validate
 
+echo [INFO] Executando smoke tests nativos...
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && DTC=/tmp/gatito-dtb-pacher-dtc && g++ -std=c++17 -O2 -I\"$DTC\" -I\"$DTC/libfdt\" native/test_dtc.cpp build/dtc_bridge.o build/dtc_embedded.o \"$DTC/checks.o\" \"$DTC/data.o\" \"$DTC/flattree.o\" \"$DTC/fstree.o\" \"$DTC/livetree.o\" \"$DTC/srcpos.o\" \"$DTC/treesource.o\" \"$DTC/util.o\" \"$DTC/dtc-lexer.lex.o\" \"$DTC/dtc-parser.tab.o\" \"$DTC/libfdt/libfdt.a\" -static-libgcc -static-libstdc++ -o build/test_dtc.exe && ./build/test_dtc.exe tests/native-smoke.dts build/smoke && g++ -std=c++17 -O2 native/test_model.cpp native/dtb_model.cpp -o build/test_model.exe && ./build/test_model.exe tests/semantic-donor.dts tests/semantic-receiver.dts"
+if errorlevel 1 goto :error_tests
+
+echo [OK] Smoke tests concluidos.
+echo.
 echo [OK] Gatito-Dtb-Pacher.exe encontrado e nao esta vazio.
 echo.
 echo ================================================
@@ -132,6 +138,11 @@ goto :stop
 :error_validate
 echo.
 echo [ERRO] A validacao do executavel falhou.
+goto :stop
+
+:error_tests
+echo.
+echo [ERRO] Um ou mais smoke tests falharam.
 goto :stop
 
 :stop
