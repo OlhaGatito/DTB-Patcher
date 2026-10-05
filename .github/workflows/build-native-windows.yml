@@ -53,7 +53,7 @@ jobs:
           mkdir -p build
           gcc -Dmain=dtc_internal_main -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c "$DTC/dtc.c" -o build/dtc_embedded.o
           gcc -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c native/dtc_bridge.c -o build/dtc_bridge.o
-          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito Dtb Pacher.exe
+          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe
 
       - name: Native DTC smoke test
         shell: msys2 {0}
@@ -73,14 +73,14 @@ jobs:
       - name: Verify executable
         shell: pwsh
         run: |
-          if (!(Test-Path "build\\Gatito Dtb Pacher.exe")) { throw "Native executable was not produced." }
-          Get-Item "build\\Gatito Dtb Pacher.exe" | Select-Object FullName,Length
+          if (!(Test-Path "build\\Gatito-Dtb-Pacher.exe")) { throw "Native executable was not produced." }
+          Get-Item "build\\Gatito-Dtb-Pacher.exe" | Select-Object FullName,Length
 
       - name: Verify runtime dependencies
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
-          deps="$(ldd build/Gatito Dtb Pacher.exe 2>/dev/null || true)"
+          deps="$(ldd build/Gatito-Dtb-Pacher.exe 2>/dev/null || true)"
           echo "$deps"
           if echo "$deps" | grep -Eiq 'libwinpthread|libstdc\+\+-6|libgcc_s_seh'; then
             echo "Standalone runtime check failed: MinGW runtime DLL dependency detected."
@@ -89,10 +89,10 @@ jobs:
 
       - name: Package
         shell: pwsh
-        run: Compress-Archive -Path build\\Gatito Dtb Pacher.exe -DestinationPath Gatito Dtb Pacher-Windows-Native.zip -Force
+        run: Compress-Archive -Path build\\Gatito-Dtb-Pacher.exe -DestinationPath Gatito-Dtb-Pacher-Windows-Native.zip -Force
 
       - name: Upload native build
         uses: actions/upload-artifact@v4
         with:
           name: Gatito Dtb Pacher-Windows-Native
-          path: Gatito Dtb Pacher-Windows-Native.zip
+          path: Gatito-Dtb-Pacher-Windows-Native.zip
