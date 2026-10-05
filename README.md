@@ -12,8 +12,10 @@ DTB-Patcher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O proj
 - Migracao para C++/Win32.
 - Device Tree Compiler integrado ao processo.
 - Nenhum dtc.exe externo exigido pelo aplicativo final.
-- Comparacao estrutural entre DTBs.
-- Selecao individual das diferencas.
+- Comparacao funcional entre DTBs, organizada por Controles, Audio, Display, Energia e Outros.
+- Doador e Receptor exibidos lado a lado em cada bloco.
+- Selecao individual somente do lado do Doador.
+- Transferencia limitada a propriedades existentes e compativeis no Receptor.
 - Doador e Receptor nunca sao sobrescritos.
 - Geracao automatica de patch-001.dtb, patch-002.dtb e assim por diante.
 - Mascote Saruê do Gatito-Ports.
@@ -29,13 +31,18 @@ DTB-Patcher nasceu para evitar o fluxo perigoso de editar DTBs no escuro. O proj
          +---- comparar ----+
          |                  |
          v                  v
-    Diferencas         DTB Receptor
-         |
-         v
-    Selecao explicita
-         |
-         v
-    Novo DTB
+    Blocos funcionais  DTB Receptor
+         |                   |
+         +-- selecao --------+
+                  |
+                  v
+          Receptor como base
+                  |
+                  v
+          Substituicao dos blocos
+                  |
+                  v
+              Novo DTB
          |
          v
     Documents/DTB-Patcher/New dtb/
