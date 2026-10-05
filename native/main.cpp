@@ -427,6 +427,12 @@ static void layout(){
 
 static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
  switch(m){
+ case WM_GETMINMAXINFO:{
+  MINMAXINFO* mm=(MINMAXINFO*)l;
+  mm->ptMinTrackSize.x=1000;
+  mm->ptMinTrackSize.y=720;
+  return 0;
+ }
  case WM_ERASEBKGND:return 1;
  case WM_SIZE:if(g_main)layout();return 0;
  case WM_CTLCOLORSTATIC:{
