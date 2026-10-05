@@ -359,16 +359,16 @@ bool relevantProperty(const std::string& category,const std::string& p){
     if(category=="audio")
         return has(x,"audio")||has(x,"sound")||has(x,"codec")||has(x,"dai")||
                has(x,"i2s")||has(x,"routing")||has(x,"format")||has(x,"mclk")||
-               has(x,"clock")||x=="compatible"||x=="status"||x=="reg";
+               has(x,"clock");
     if(category=="display")
         return has(x,"display")||has(x,"panel")||has(x,"backlight")||has(x,"lcd")||
                has(x,"timing")||has(x,"width")||has(x,"height")||has(x,"format")||
-               has(x,"reset")||has(x,"enable")||has(x,"power")||has(x,"remote")||
-               x=="compatible"||x=="status"||x=="reg";
+               has(x,"reset")||has(x,"enable")||has(x,"power")||
+               (has(x,"remote") && !has(x,"remote-endpoint"));
     if(category=="power")
         return has(x,"battery")||has(x,"charger")||has(x,"charge")||has(x,"voltage")||
                has(x,"current")||has(x,"capacity")||has(x,"adc")||has(x,"channel")||
-               has(x,"gpio")||x=="compatible"||x=="status"||x=="reg";
+               has(x,"gpio");
     return true;
 }
 
