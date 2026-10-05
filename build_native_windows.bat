@@ -11,7 +11,6 @@ echo.
 
 cd /d "%~dp0"
 if errorlevel 1 goto :error_cd
-
 set "PROJECT_DIR=%CD%"
 set "MSYS2_ROOT="
 
@@ -19,89 +18,63 @@ echo [INFO] Projeto: %PROJECT_DIR%
 echo [INFO] Procurando uma instalacao valida do MSYS2...
 echo.
 
+rem Avoid a parenthesized FOR block here. %ProgramFiles(x86)% contains
+rem parentheses and CMD parses those before executing a compound block.
 if defined MSYS2_ROOT_ENV if exist "%MSYS2_ROOT_ENV%\usr\bin\bash.exe" set "MSYS2_ROOT=%MSYS2_ROOT_ENV%"
-
-if not defined MSYS2_ROOT (
-    for %%P in (
-        "C:\msys64"
-        "%ProgramFiles%\msys64"
-        "%ProgramFiles(x86)%\msys64"
-        "%LOCALAPPDATA%\msys64"
-        "%USERPROFILE%\scoop\apps\msys2\current"
-    ) do (
-        if not defined MSYS2_ROOT if exist "%%~P\usr\bin\bash.exe" if exist "%%~P\usr\bin\pacman.exe" set "MSYS2_ROOT=%%~P"
-    )
-)
+if not defined MSYS2_ROOT if exist "C:\msys64\usr\bin\bash.exe" set "MSYS2_ROOT=C:\msys64"
+if not defined MSYS2_ROOT if exist "%ProgramFiles%\msys64\usr\bin\bash.exe" set "MSYS2_ROOT=%ProgramFiles%\msys64"
+if not defined MSYS2_ROOT if defined ProgramFiles(x86) if exist "%ProgramFiles(x86)%\msys64\usr\bin\bash.exe" set "MSYS2_ROOT=%ProgramFiles(x86)%\msys64"
+if not defined MSYS2_ROOT if exist "%LOCALAPPDATA%\msys64\usr\bin\bash.exe" set "MSYS2_ROOT=%LOCALAPPDATA%\msys64"
+if not defined MSYS2_ROOT if exist "%USERPROFILE%\scoop\apps\msys2\current\usr\bin\bash.exe" set "MSYS2_ROOT=%USERPROFILE%\scoop\apps\msys2\current"
 
 if not defined MSYS2_ROOT goto :error_msys2
 
 set "BASH=%MSYS2_ROOT%\usr\bin\bash.exe"
 for /f "delims=" %%U in ('"%MSYS2_ROOT%\usr\bin\cygpath.exe" -u "%PROJECT_DIR%"') do set "PROJECT_DIR_UNIX=%%U"
+
 echo [OK] MSYS2 encontrado: %BASH%
 echo.
 echo [INFO] Verificando ambiente UCRT64 e dependencias...
 echo.
-echo [INFO] Diagnostico das ferramentas MSYS2:
-echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; printf '  git        '; command -v git || echo FALTANDO; printf '  make       '; command -v make || echo FALTANDO; printf '  flex       '; command -v flex || echo FALTANDO; printf '  bison      '; command -v bison || echo FALTANDO; printf '  pkg-config '; command -v pkg-config || echo FALTANDO; printf '  cmp        '; command -v cmp || echo FALTANDO; printf '  gcc        '; command -v gcc || echo FALTANDO; printf '  g++        '; command -v g++ || echo FALTANDO"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; command -v git >/dev/null && command -v flex >/dev/null && command -v bison >/dev/null && command -v gcc >/dev/null && command -v g++ >/dev/null && command -v ar >/dev/null"
 if errorlevel 1 goto :error_deps
 
-echo.
-echo [INFO] Verificando pacotes MSYS2 instalados:
-echo.
+"%BASH%" -lc "pacman -Q git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc >/dev/null 2>&1"
+if errorlevel 1 goto :error_deps
 
-"%BASH%" -lc "pacman -Q git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc 2>&1"
-if errorlevel 1 (
-    echo.
-    echo [AVISO] Um ou mais pacotes acima nao estao instalados.
-    echo [INFO] O script nao vai instalar nada automaticamente.
-    echo [INFO] Para instalar manualmente, use o MSYS2 UCRT64:
-    echo        pacman -S --needed git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc
-    goto :error_deps
-)
-
-echo.
 echo [OK] Ferramentas e pacotes necessarios encontrados.
 echo.
-echo [1/3] Baixando e compilando o DTC oficial...
-echo        Isso pode levar alguns minutos.
+echo [1/3] Baixando e compilando o DTC oficial em commit fixo...
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"%PROJECT_DIR_UNIX%\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && cp '%PROJECT_DIR_UNIX%/native/dtc_bridge.h' ./dtc_bridge.h && sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c && printf '#define DTC_VERSION "DTC native"\n' > version_gen.h && bison -d -o dtc-parser.tab.c dtc-parser.y && flex -o dtc-lexer.lex.c dtc-lexer.l && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c checks.c -o checks.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c data.c -o data.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c flattree.c -o flattree.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c fstree.c -o fstree.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c livetree.c -o livetree.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c srcpos.c -o srcpos.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c treesource.c -o treesource.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c util.c -o util.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-lexer.lex.c -o dtc-lexer.lex.o && gcc -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I. -Ilibfdt -c dtc-parser.tab.c -o dtc-parser.tab.o && gcc -I. -Ilibfdt -c libfdt/fdt.c -o libfdt/fdt.o && gcc -I. -Ilibfdt -c libfdt/fdt_ro.c -o libfdt/fdt_ro.o && gcc -I. -Ilibfdt -c libfdt/fdt_wip.c -o libfdt/fdt_wip.o && gcc -I. -Ilibfdt -c libfdt/fdt_sw.c -o libfdt/fdt_sw.o && gcc -I. -Ilibfdt -c libfdt/fdt_rw.c -o libfdt/fdt_rw.o && gcc -I. -Ilibfdt -c libfdt/fdt_strerror.c -o libfdt/fdt_strerror.o && gcc -I. -Ilibfdt -c libfdt/fdt_empty_tree.c -o libfdt/fdt_empty_tree.o && gcc -I. -Ilibfdt -c libfdt/fdt_addresses.c -o libfdt/fdt_addresses.o && gcc -I. -Ilibfdt -c libfdt/fdt_overlay.c -o libfdt/fdt_overlay.o && gcc -I. -Ilibfdt -c libfdt/fdt_check.c -o libfdt/fdt_check.o && ar rcs libfdt/libfdt.a libfdt/*.o"
+"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && bash native/build_dtc_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
 if errorlevel 1 goto :error_dtc
 
 echo.
-echo [OK] DTC compilado.
-echo.
-echo [2/3] Compilando o Gatito Dtb Pacher...
+echo [2/3] Compilando o Gatito Dtb Pacher e executando os testes...
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"%PROJECT_DIR_UNIX%\" && rm -rf build && mkdir -p build && gcc -Dmain=dtc_internal_main -DNO_YAML -Dexit=dtbp_dtc_exit -include dtc_bridge.h -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c /tmp/gatito-dtb-pacher-dtc/dtc.c -o build/dtc_embedded.o && gcc -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c native/dtc_bridge.c -o build/dtc_bridge.o && g++ -std=c++17 -O2 -mwindows -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o /tmp/gatito-dtb-pacher-dtc/checks.o /tmp/gatito-dtb-pacher-dtc/data.o /tmp/gatito-dtb-pacher-dtc/flattree.o /tmp/gatito-dtb-pacher-dtc/fstree.o /tmp/gatito-dtb-pacher-dtc/livetree.o /tmp/gatito-dtb-pacher-dtc/srcpos.o /tmp/gatito-dtb-pacher-dtc/treesource.o /tmp/gatito-dtb-pacher-dtc/util.o /tmp/gatito-dtb-pacher-dtc/dtc-lexer.lex.o /tmp/gatito-dtb-pacher-dtc/dtc-parser.tab.o /tmp/gatito-dtb-pacher-dtc/libfdt/libfdt.a -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe"
-if errorlevel 1 goto :error_compile
+"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && bash native/build_native_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
+if errorlevel 1 goto :error_tests
 
 if not exist "build\Gatito-Dtb-Pacher.exe" goto :error_missing
 
 echo.
 echo [3/3] Validando o executavel...
 echo.
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"%PROJECT_DIR_UNIX%\" && test -s build/Gatito-Dtb-Pacher.exe"
+"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && test -s build/Gatito-Dtb-Pacher.exe"
 if errorlevel 1 goto :error_validate
 
-echo [INFO] Executando smoke tests nativos...
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"%PROJECT_DIR_UNIX%\" && DTC=/tmp/gatito-dtb-pacher-dtc && g++ -std=c++17 -O2 -I\"$DTC\" -I\"$DTC/libfdt\" native/test_dtc.cpp build/dtc_bridge.o build/dtc_embedded.o \"$DTC/checks.o\" \"$DTC/data.o\" \"$DTC/flattree.o\" \"$DTC/fstree.o\" \"$DTC/livetree.o\" \"$DTC/srcpos.o\" \"$DTC/treesource.o\" \"$DTC/util.o\" \"$DTC/dtc-lexer.lex.o\" \"$DTC/dtc-parser.tab.o\" \"$DTC/libfdt/libfdt.a\" -static-libgcc -static-libstdc++ -o build/test_dtc.exe && ./build/test_dtc.exe tests/native-smoke.dts build/smoke && g++ -std=c++17 -O2 native/test_model.cpp native/dtb_model.cpp -o build/test_model.exe && ./build/test_model.exe tests/semantic-donor.dts tests/semantic-receiver.dts"
-if errorlevel 1 goto :error_tests
-
-echo [OK] Smoke tests concluidos.
 echo.
-echo [OK] Gatito-Dtb-Pacher.exe encontrado e nao esta vazio.
+echo [OK] Build e todos os testes concluidos.
+echo.
+echo Executavel:
+echo %PROJECT_DIR%\build\Gatito-Dtb-Pacher.exe
 echo.
 echo ================================================
 echo              BUILD CONCLUIDO
 echo ================================================
-echo.
-echo Executavel:
-echo %PROJECT_DIR%\build\Gatito-Dtb-Pacher.exe
 echo.
 pause
 exit /b 0
@@ -115,35 +88,25 @@ echo [ERRO] Nenhuma instalacao valida do MSYS2 foi encontrada.
 goto :stop
 
 :error_deps
-echo [ERRO] O MSYS2 foi encontrado, mas falta pelo menos uma dependencia.
-echo.
-echo Instale no MSYS2 com:
-echo pacman -S --needed git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc
+echo [ERRO] O MSYS2 foi encontrado, mas falta uma dependencia de build.
+echo [INFO] Instale no MSYS2 UCRT64:
+echo        pacman -S --needed git make flex bison pkgconf diffutils mingw-w64-ucrt-x86_64-gcc
 goto :stop
 
 :error_dtc
-echo.
-echo [ERRO] Falha ao compilar o DTC.
+echo [ERRO] Falha ao compilar o DTC oficial.
 goto :stop
 
-:error_compile
-echo.
-echo [ERRO] Falha ao compilar o Gatito Dtb Pacher.
+:error_tests
+echo [ERRO] Falha no build nativo ou em um teste de regressao.
 goto :stop
 
 :error_missing
-echo.
 echo [ERRO] O executavel nao foi gerado.
 goto :stop
 
 :error_validate
-echo.
-echo [ERRO] A validacao do executavel falhou.
-goto :stop
-
-:error_tests
-echo.
-echo [ERRO] Um ou mais smoke tests falharam.
+echo [ERRO] O executavel gerado nao passou na validacao basica.
 goto :stop
 
 :stop
