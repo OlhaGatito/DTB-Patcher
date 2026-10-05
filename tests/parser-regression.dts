@@ -1,0 +1,16 @@
+/dts-v1/;
+
+/memreserve/ 0x0000000000001000 0x0000000000000100;
+
+/ {
+    gpio0: gpio@0 {
+        phandle = <1>;
+        #gpio-cells = <2>;
+    };
+
+    test {
+        linux,code = <0x220>;
+        rockchip,pins = <1 2 3>;
+        gpios = <&gpio0 20 0>;
+    };
+};
