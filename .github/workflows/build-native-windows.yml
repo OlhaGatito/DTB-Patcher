@@ -48,7 +48,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/native/dtc_bridge.h" ./dtc_bridge.h
           # The upstream helper is private to dtc.c; expose only that helper
           # so the embedded bridge can reproduce the CLI check sequence.
-          sed -i 's/fill_fullpaths/dtbp_fill_fullpaths/g' dtc.c
+          sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c
           # Validate the exact native build path after the DTC object build.
           # Build only the DTC core objects and libfdt. The legacy convert-dtsv0
           # utility is not embedded and requires the POSIX fnmatch.h header,
