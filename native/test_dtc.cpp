@@ -11,6 +11,13 @@ int main(int argc,char**argv){
     if(dtbp_dtc_decompile(dtb.c_str(),round.c_str())){std::fprintf(stderr,"%s\n",dtbp_dtc_error());return 4;}
     if(!std::filesystem::exists(dtb)||!std::filesystem::exists(round))return 5;
 
+    auto roundtripDtb=(out/"smoke-roundtrip.dtb").string();
+    if(dtbp_dtc_compile(round.c_str(),roundtripDtb.c_str())){
+        std::fprintf(stderr,"Round-trip DTS failed to compile: %s\n",dtbp_dtc_error());
+        return 6;
+    }
+    if(!std::filesystem::exists(roundtripDtb))return 7;
+
     auto bad=(dts.parent_path()/"invalid-smoke.dts").string();
     auto badOut=(out/"invalid.dtb").string();
     int badRc=dtbp_dtc_compile(bad.c_str(),badOut.c_str());
@@ -20,5 +27,6 @@ int main(int argc,char**argv){
     }
     std::printf("DTC fatal-error trap test OK: rc=%d\\n",badRc);
     std::printf("DTC native smoke test OK: %s\n",dtbp_dtc_version());
+    std::printf("DTC round-trip recompile OK\n");
     return 0;
 }
