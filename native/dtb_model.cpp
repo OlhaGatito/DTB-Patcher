@@ -21,6 +21,7 @@
 #include <set>
 #include <cstdlib>
 #include <functional>
+#include <cstdint>
 
 namespace {
 
@@ -50,13 +51,13 @@ std::vector<std::string> lex(const std::string& in){
             i=j;
             continue;
         }
-        if(std::string("{};=<>[],:&").find(in[i])!=std::string::npos){
+        if(std::string("{};=<>[]:").find(in[i])!=std::string::npos){
             o.emplace_back(1,in[i]);++i;continue;
         }
         size_t j=i;
         while(j<in.size() &&
               !std::isspace((unsigned char)in[j]) &&
-              std::string("{};=<>[],:&").find(in[j])==std::string::npos)++j;
+              std::string("{};=<>[]:").find(in[j])==std::string::npos)++j;
         o.push_back(in.substr(i,j-i));
         i=j;
     }
@@ -373,9 +374,11 @@ bool relevantProperty(const std::string& category,const std::string& p){
 
 std::string nodeKey(const DtbNode& n,const std::string& category){
     std::string label=firstProp(n,{"label","device_type"});
-    if(!label.empty())return category+":"+normalizeName(label);
-    std::string name=normalizeName(n.name);
-    return category+":"+name;
+    if(!label.empty())return category+":label:"+normalizeName(label);
+    std::string reg=propValue(n,"reg");
+    if(!reg.empty())
+        return category+":node:"+normalizeName(n.name)+"|reg:"+normalizeName(reg);
+    return category+":path:"+normalizeName(n.path);
 }
 
 std::string blockSummary(const DtbNode& n,const std::vector<std::string>& props,bool gpioMode){
@@ -529,9 +532,37 @@ bool parse_dts_file(const std::string& f,DtbNode& root){
     std::ifstream in(f,std::ios::binary);
     if(!in)return false;
     std::stringstream s;s<<in.rdbuf();
-    Parser p;p.t=lex(s.str());root={};root.path="/";root.name="";
-    while(p.p<p.t.size()&&p.t[p.p]!="{")++p.p;
-    return p.node(root,"/");
+    Parser p;
+    p.t=lex(s.str());
+    root={};
+    root.path="/";
+    root.name="";
+    while(p.p<p.t.size()&&p.t[p.p]!="{"){
+        if(p.t[p.p]=="/dts-v1/"||p.t[p.p]=="/plugin/"){
+            while(p.p<p.t.size()&&p.t[p.p]!=";")++p.p;
+            if(p.p<p.t.size())++p.p;
+            continue;
+        }
+        std::string label;
+        if(p.p+1<p.t.size()&&p.t[p.p+1]==":"){
+            label=p.t[p.p];
+            p.p+=2;
+        }
+        if(p.p<p.t.size()&&p.t[p.p]=="/memreserve/"){
+            std::string v;
+            ++p.p;
+            while(p.p<p.t.size()&&p.t[p.p]!=";"){
+                if(!v.empty())v+=' ';
+                v+=p.t[p.p++];
+            }
+            if(p.p<p.t.size())++p.p;
+            root.memreserve.push_back(label.empty()?"/memreserve/ "+v:label+": /memreserve/ "+v);
+            continue;
+        }
+        while(p.p<p.t.size()&&p.t[p.p]!=";")++p.p;
+        if(p.p<p.t.size())++p.p;
+    }
+    return p.p<p.t.size()&&p.node(root,"/");
 }
 
 bool render_dts(const DtbNode& root,const std::string& f){
