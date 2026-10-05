@@ -49,6 +49,7 @@ jobs:
           # The upstream helper is private to dtc.c; expose only that helper
           # so the embedded bridge can reproduce the CLI check sequence.
           sed -i -e 's/fill_fullpaths/dtbp_fill_fullpaths/g' -e 's/^static void dtbp_fill_fullpaths/void dtbp_fill_fullpaths/' dtc.c
+          printf '#define DTC_VERSION "DTC native"\n' > version_gen.h
           # Do not invoke the deprecated upstream Makefile here: its default
           # target graph always includes the legacy convert-dtsv0 utility.
           # Generate and compile only the DTC core and libfdt objects needed
