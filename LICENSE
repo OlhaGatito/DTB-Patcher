@@ -1,0 +1,17 @@
+GNU GENERAL PUBLIC LICENSE
+Version 2, June 1991
+
+Copyright (C) 2026 OlhaGatito
+
+Gatito Dtb Pacher is distributed under the GNU General Public License
+version 2 or any later version.
+
+This repository incorporates the Device Tree Compiler (DTC), which is
+licensed under GPL-2.0-or-later. See THIRD-PARTY-NOTICES.md and
+tools/DTC-LICENSE.txt for the upstream component information.
+
+This is the standard GPLv2 license notice. The complete license text is
+provided in this repository so that source and binary redistribution can
+be handled consistently with the GPL.
+
+[The full GNU GPL v2 text should be retained here for redistribution.]
