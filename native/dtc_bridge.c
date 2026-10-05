@@ -1,5 +1,5 @@
 /*
- * DTB-Patcher native DTC bridge.
+ * Gatito Dtb Pacher native DTC bridge.
  *
  * The implementation deliberately uses the upstream DTC front-end APIs
  * instead of reimplementing DTS parsing or DTB serialization here.
