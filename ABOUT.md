@@ -1,6 +1,6 @@
-# About DTB-Patcher
+# About Gatito Dtb Pacher
 
-DTB-Patcher is a Windows-native tool created to make Device Tree Blob work safer and easier to inspect.
+Gatito Dtb Pacher is a Windows-native tool created to make Device Tree Blob work safer and easier to inspect.
 
 ## What it does
 
@@ -26,7 +26,7 @@ The application uses the Saruê mascot from the Gatito-Ports project as project 
 
 ## Third-party software
 
-DTB-Patcher incorporates source code from the Device Tree Compiler project.
+Gatito Dtb Pacher incorporates source code from the Device Tree Compiler project.
 
 DTC upstream:
 https://github.com/dgibson/dtc
