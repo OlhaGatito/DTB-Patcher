@@ -62,7 +62,7 @@ static void logLine(const std::string&s){
  if(!g_log)return;
  int n=GetWindowTextLengthA(g_log);
  SendMessageA(g_log,EM_SETSEL,n,n);
- std::string x=s+"\\r\\n";
+ std::string x=s+"\r\n";
  SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
 }
 static void setStatus(const std::string&s){if(g_status)setText(g_status,s);}
@@ -308,9 +308,7 @@ static void build(){
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }catch(...){
   logLine("ERRO AO GERAR: excecao desconhecida.");
-  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\r
-\r
-Os arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
+  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\\r\\n\\r\\nOs arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }
 }
@@ -495,7 +493,7 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
 
 static HWND makeList(HWND parent,HINSTANCE hi,int id){
  HWND lv=CreateWindowExA(WS_EX_CLIENTEDGE,WC_LISTVIEWA,"",WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SHOWSELALWAYS|LVS_SINGLESEL,
- 0,0,100,100,parent,(HMENU)id,hi,nullptr);
+ 0,0,100,100,parent,(HMENU)(INT_PTR)id,hi,nullptr);
  ListView_SetExtendedListViewStyle(lv,LVS_EX_FULLROWSELECT|LVS_EX_CHECKBOXES|LVS_EX_DOUBLEBUFFER);
  const char* heads[]={"Propriedade / caminho","Tipo","Detalhe"};
  int widths[]={320,95,260};
