@@ -48,14 +48,14 @@ echo.
 echo [1/3] Baixando e compilando o DTC oficial em commit fixo...
 echo.
 
-"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && bash native/build_dtc_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
+"%BASH%" native/build_dtc_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
 if errorlevel 1 goto :error_dtc
 
 echo.
 echo [2/3] Compilando o Gatito Dtb Pacher e executando os testes...
 echo.
 
-"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && bash native/build_native_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
+"%BASH%" native/build_native_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-pacher-dtc"
 if errorlevel 1 goto :error_tests
 
 if not exist "build\Gatito-Dtb-Pacher.exe" goto :error_missing
@@ -63,7 +63,7 @@ if not exist "build\Gatito-Dtb-Pacher.exe" goto :error_missing
 echo.
 echo [3/3] Validando o executavel...
 echo.
-"%BASH%" -lc "cd "%PROJECT_DIR_UNIX%" && test -s build/Gatito-Dtb-Pacher.exe"
+"%BASH%" -lc "test -s build/Gatito-Dtb-Pacher.exe"
 if errorlevel 1 goto :error_validate
 
 echo.
