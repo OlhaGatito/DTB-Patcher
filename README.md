@@ -85,9 +85,3 @@ O código incorpora o **Device Tree Compiler (DTC)** sob **GPL‑2.0‑or‑late
 Consulte `Main/tools/DTC-LICENSE.txt` para detalhes.
 
 ---
-
-### 🎉 Pronto para patchar!
-
-Baixe, execute e comece a gerar seus DTBs com confiança. 💾
-
-```
