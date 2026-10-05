@@ -43,7 +43,7 @@ jobs:
           rm -rf /tmp/dtc
           git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/dtc
           cd /tmp/dtc
-          make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit" dtc libfdt
+          make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit -include $GITHUB_WORKSPACE/native/dtc_bridge.h" dtc libfdt
 
       - name: Compile native Gatito Dtb Pacher
         shell: msys2 {0}
