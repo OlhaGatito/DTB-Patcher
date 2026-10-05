@@ -43,7 +43,7 @@ jobs:
           rm -rf /tmp/dtc
           git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/dtc
           cd /tmp/dtc
-          make NO_YAML=1 NO_PYTHON=1 dtc libfdt
+          make NO_YAML=1 NO_PYTHON=1 EXTRA_CFLAGS="-Dexit=dtbp_dtc_exit" dtc libfdt
 
       - name: Compile native Gatito Dtb Pacher
         shell: msys2 {0}
@@ -51,7 +51,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           DTC=/tmp/dtc
           mkdir -p build
-          gcc -Dmain=dtc_internal_main -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c "$DTC/dtc.c" -o build/dtc_embedded.o
+          gcc -Dmain=dtc_internal_main -DNO_YAML -Dexit=dtbp_dtc_exit -I"$DTC" -I"$DTC/libfdt" -c "$DTC/dtc.c" -o build/dtc_embedded.o
           gcc -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c native/dtc_bridge.c -o build/dtc_bridge.o
           g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe
 
