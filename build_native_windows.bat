@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions
 
-title DTB-Patcher - Native Windows Build
+title Gatito Dtb Pacher - Native Windows Build
 
 echo.
 echo ================================================
-echo          DTB-Patcher - Native C++ Build
+echo          Gatito Dtb Pacher - Native C++ Build
 echo ================================================
 echo.
 
@@ -67,34 +67,34 @@ echo [1/3] Baixando e compilando o DTC oficial...
 echo        Isso pode levar alguns minutos.
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/dtb-patcher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/dtb-patcher-dtc && cd /tmp/dtb-patcher-dtc && make NO_YAML=1 NO_PYTHON=1 dtc libfdt"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf /tmp/gatito-dtb-pacher-dtc && git clone --depth 1 https://github.com/dgibson/dtc.git /tmp/gatito-dtb-pacher-dtc && cd /tmp/gatito-dtb-pacher-dtc && make NO_YAML=1 NO_PYTHON=1 dtc libfdt"
 if errorlevel 1 goto :error_dtc
 
 echo.
 echo [OK] DTC compilado.
 echo.
-echo [2/3] Compilando o DTB-Patcher...
+echo [2/3] Compilando o Gatito Dtb Pacher...
 echo.
 
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf build && mkdir -p build && gcc -Dmain=dtc_internal_main -DNO_YAML -I/tmp/dtb-patcher-dtc -I/tmp/dtb-patcher-dtc/libfdt -c /tmp/dtb-patcher-dtc/dtc.c -o build/dtc_embedded.o && gcc -DNO_YAML -I/tmp/dtb-patcher-dtc -I/tmp/dtb-patcher-dtc/libfdt -c native/dtc_bridge.c -o build/dtc_bridge.o && g++ -std=c++17 -O2 -mwindows -I/tmp/dtb-patcher-dtc -I/tmp/dtb-patcher-dtc/libfdt native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o /tmp/dtb-patcher-dtc/checks.o /tmp/dtb-patcher-dtc/data.o /tmp/dtb-patcher-dtc/flattree.o /tmp/dtb-patcher-dtc/fstree.o /tmp/dtb-patcher-dtc/livetree.o /tmp/dtb-patcher-dtc/srcpos.o /tmp/dtb-patcher-dtc/treesource.o /tmp/dtb-patcher-dtc/util.o /tmp/dtb-patcher-dtc/dtc-lexer.lex.o /tmp/dtb-patcher-dtc/dtc-parser.tab.o /tmp/dtb-patcher-dtc/libfdt/libfdt.a -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/DTB-Patcher.exe"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && rm -rf build && mkdir -p build && gcc -Dmain=dtc_internal_main -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c /tmp/gatito-dtb-pacher-dtc/dtc.c -o build/dtc_embedded.o && gcc -DNO_YAML -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt -c native/dtc_bridge.c -o build/dtc_bridge.o && g++ -std=c++17 -O2 -mwindows -I/tmp/gatito-dtb-pacher-dtc -I/tmp/gatito-dtb-pacher-dtc/libfdt native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o /tmp/gatito-dtb-pacher-dtc/checks.o /tmp/gatito-dtb-pacher-dtc/data.o /tmp/gatito-dtb-pacher-dtc/flattree.o /tmp/gatito-dtb-pacher-dtc/fstree.o /tmp/gatito-dtb-pacher-dtc/livetree.o /tmp/gatito-dtb-pacher-dtc/srcpos.o /tmp/gatito-dtb-pacher-dtc/treesource.o /tmp/gatito-dtb-pacher-dtc/util.o /tmp/gatito-dtb-pacher-dtc/dtc-lexer.lex.o /tmp/gatito-dtb-pacher-dtc/dtc-parser.tab.o /tmp/gatito-dtb-pacher-dtc/libfdt/libfdt.a -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito Dtb Pacher.exe"
 if errorlevel 1 goto :error_compile
 
-if not exist "build\DTB-Patcher.exe" goto :error_missing
+if not exist "build\Gatito Dtb Pacher.exe" goto :error_missing
 
 echo.
 echo [3/3] Validando o executavel...
 echo.
-"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && test -s build/DTB-Patcher.exe"
+"%BASH%" -lc "export PATH=/ucrt64/bin:/usr/bin; cd \"$(cygpath -u '%PROJECT_DIR%')\" && test -s build/Gatito Dtb Pacher.exe"
 if errorlevel 1 goto :error_validate
 
-echo [OK] DTB-Patcher.exe encontrado e nao esta vazio.
+echo [OK] Gatito Dtb Pacher.exe encontrado e nao esta vazio.
 echo.
 echo ================================================
 echo              BUILD CONCLUIDO
 echo ================================================
 echo.
 echo Executavel:
-echo %PROJECT_DIR%\build\DTB-Patcher.exe
+echo %PROJECT_DIR%\build\Gatito Dtb Pacher.exe
 echo.
 pause
 exit /b 0
@@ -121,7 +121,7 @@ goto :stop
 
 :error_compile
 echo.
-echo [ERRO] Falha ao compilar o DTB-Patcher.
+echo [ERRO] Falha ao compilar o Gatito Dtb Pacher.
 goto :stop
 
 :error_missing
