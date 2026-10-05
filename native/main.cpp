@@ -312,6 +312,30 @@ static std::string readWholeFile(const std::string& path){
     return s.str();
 }
 
+static bool sameTreeShape(const DtbNode& a,const DtbNode& b){
+    if(a.memreserve.size()!=b.memreserve.size())return false;
+    if(a.children.size()!=b.children.size())return false;
+    for(const auto& kv:a.properties){
+        if(!b.properties.count(kv.first))return false;
+    }
+    for(const auto& kv:b.properties){
+        if(!a.properties.count(kv.first) &&
+           kv.first!="phandle" && kv.first!="linux,phandle")return false;
+    }
+    for(const auto& kv:a.children){
+        auto it=b.children.find(kv.first);
+        if(it==b.children.end()||!sameTreeShape(kv.second,it->second))return false;
+    }
+    return true;
+}
+
+static void removeTempFile(const std::string& path){
+    if(path.empty())return;
+    std::error_code ec;
+    fs::remove(path,ec);
+    if(ec)fileLog("Nao foi possivel remover temporario: "+path+" | "+ec.message());
+}
+
 static void updatePreview(){
     if(!g_preview)return;
     if(!g_analyzed){
@@ -344,6 +368,7 @@ static void updatePreview(){
             return;
         }
         std::string text=readWholeFile(p);
+        removeTempFile(p);
         if(text.empty())text="O preview ficou vazio.";
         std::string header="GATITO DTB PACHER — PREVIEW DO DTS FINAL\\r\\n"
                            "Base: RECEPTOR | Blocos selecionados do DOADOR: "+
@@ -418,6 +443,8 @@ static void analyze(){
 
         g_donor_tree=std::move(donor);
         g_receiver_tree=std::move(receiver);
+        removeTempFile(dd);
+        removeTempFile(rr);
         g_items=build_transfer_plan(g_donor_tree,g_receiver_tree);
         fillLists();
         g_analyzed=true;
@@ -620,7 +647,43 @@ static void build(){
             return;
         }
 
-        logLine("Round-trip DTS -> DTB -> DTS: OK.");
+        // A parse/decompile success alone is insufficient: a lossy parser can
+        // still produce syntactically valid DTS. Verify that the generated
+        // tree did not lose nodes/properties/reservations, then compile the
+        // decompiled DTS again and require byte-for-byte stability.
+        if(!sameTreeShape(patched,verifyTree)){
+            logLine("VALIDACAO FALHOU: round-trip alterou a estrutura do Receptor/Patch.");
+            removeTempFile(verifyDts);
+            std::error_code rmec;
+            fs::remove(out,rmec);
+            MessageBoxA(g_main,
+                "O DTB gerado perdeu ou ganhou estrutura inesperadamente durante o round-trip.\r\n\r\n"
+                "O arquivo foi reprovado e removido.",
+                "Falha na validacao",MB_OK|MB_ICONERROR);
+            setStatus("DTB reprovado por alteracao estrutural.");
+            return;
+        }
+
+        std::string verifyDtb=tempPath("verify-roundtrip.dtb");
+        if(dtbp_dtc_compile(verifyDts.c_str(),verifyDtb.c_str())||
+           readWholeFile(verifyDtb)!=readWholeFile(out)){
+            std::string e=dtbp_dtc_error();
+            if(e.empty())e="O round-trip nao reproduziu exatamente o DTB gerado.";
+            logLine("VALIDACAO FALHOU: estabilidade binaria: "+e);
+            removeTempFile(verifyDts);
+            removeTempFile(verifyDtb);
+            std::error_code rmec;
+            fs::remove(out,rmec);
+            MessageBoxA(g_main,
+                (e+"\r\n\r\nO arquivo foi reprovado e removido.").c_str(),
+                "Falha na validacao",MB_OK|MB_ICONERROR);
+            setStatus("DTB reprovado por instabilidade no round-trip.");
+            return;
+        }
+
+        removeTempFile(verifyDts);
+        removeTempFile(verifyDtb);
+        logLine("Round-trip estrutural + binario: OK.");
         updatePreview();
         logLine("Transferencias aplicadas: "+std::to_string(applied)+
                 " | ignoradas: "+std::to_string(skipped));
