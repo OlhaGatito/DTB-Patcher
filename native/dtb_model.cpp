@@ -393,6 +393,136 @@ std::string blockSummary(const DtbNode& n,const std::vector<std::string>& props,
     return compact(out,220);
 }
 
+bool parseFirstCell(const std::string& value,uint32_t& out){
+    size_t p=value.find('<');
+    if(p==std::string::npos)return false;
+    ++p;
+    while(p<value.size()&&std::isspace((unsigned char)value[p]))++p;
+    size_t e=p;
+    while(e<value.size()&&!std::isspace((unsigned char)value[e])&&value[e]!=','&&value[e]!='>')++e;
+    if(e==p)return false;
+    std::string tok=value.substr(p,e-p);
+    if(!tok.empty()&&tok[0]=='&')return false;
+    char* ep=nullptr;
+    unsigned long v=std::strtoul(tok.c_str(),&ep,0);
+    if(!ep||*ep!='\\0'||v>0xffffffffUL)return false;
+    out=(uint32_t)v;
+    return true;
+}
+
+const DtbNode* findByLabel(const DtbNode& root,const std::string& label){
+    std::vector<const DtbNode*> nodes;
+    collectNodes(root,nodes);
+    for(const DtbNode* n:nodes)if(n->label==label)return n;
+    return nullptr;
+}
+
+uint32_t nodePhandle(const DtbNode& n){
+    for(const char* name:{"phandle","linux,phandle"}){
+        auto it=n.properties.find(name);
+        if(it==n.properties.end())continue;
+        uint32_t v=0;
+        if(parseFirstCell(it->second.value,v))return v;
+    }
+    return 0;
+}
+
+const DtbNode* findByPhandle(const DtbNode& root,uint32_t phandle){
+    if(!phandle)return nullptr;
+    std::vector<const DtbNode*> nodes;
+    collectNodes(root,nodes);
+    for(const DtbNode* n:nodes)if(nodePhandle(*n)==phandle)return n;
+    return nullptr;
+}
+
+const DtbNode* matchReferencedNode(const DtbNode& donorRoot,const DtbNode& receiverRoot,
+                                   const std::string& reference){
+    const DtbNode* donorTarget=nullptr;
+    if(!reference.empty()&&reference[0]=='&'){
+        std::string label=reference.substr(1);
+        if(label.size()>2&&label[0]=='{'&&label.back()=='}')
+            label=label.substr(1,label.size()-2);
+        donorTarget=findByLabel(donorRoot,label);
+        if(!donorTarget&&label.size()&&label[0]=='/')
+            donorTarget=find_node(donorRoot,label);
+    }else{
+        char* ep=nullptr;
+        unsigned long v=std::strtoul(reference.c_str(),&ep,0);
+        if(ep&&*ep=='\\0'&&v<=0xffffffffUL)
+            donorTarget=findByPhandle(donorRoot,(uint32_t)v);
+    }
+    if(!donorTarget)return nullptr;
+
+    if(!donorTarget->label.empty())
+        if(const DtbNode* n=findByLabel(receiverRoot,donorTarget->label))return n;
+    if(const DtbNode* n=find_node(receiverRoot,donorTarget->path))return n;
+
+    std::string compat=propValue(*donorTarget,"compatible");
+    std::string reg=propValue(*donorTarget,"reg");
+    std::vector<const DtbNode*> nodes;
+    collectNodes(receiverRoot,nodes);
+    for(const DtbNode* n:nodes){
+        if(n->name==donorTarget->name &&
+           propValue(*n,"compatible")==compat &&
+           (reg.empty()||propValue(*n,"reg")==reg))
+            return n;
+    }
+    return nullptr;
+}
+
+bool translateFirstPhandle(const DtbNode& donorRoot,const DtbNode& receiverRoot,
+                           const std::string& value,std::string& translated){
+    size_t open=value.find('<'), close=value.find('>',open==std::string::npos?0:open+1);
+    if(open==std::string::npos||close==std::string::npos)return false;
+    std::string inside=value.substr(open+1,close-open-1);
+    std::stringstream ss(inside);
+    std::string first;
+    ss>>first;
+    if(first.empty())return false;
+
+    const DtbNode* donorTarget=matchReferencedNode(donorRoot,receiverRoot,first);
+    if(!donorTarget)return false;
+
+    const DtbNode* receiverTarget=nullptr;
+    if(!donorTarget->label.empty())receiverTarget=findByLabel(receiverRoot,donorTarget->label);
+    if(!receiverTarget)receiverTarget=find_node(receiverRoot,donorTarget->path);
+    if(!receiverTarget){
+        std::string compat=propValue(*donorTarget,"compatible");
+        std::string reg=propValue(*donorTarget,"reg");
+        std::vector<const DtbNode*> nodes;
+        collectNodes(receiverRoot,nodes);
+        for(const DtbNode* n:nodes)
+            if(n->name==donorTarget->name&&propValue(*n,"compatible")==compat&&
+               (reg.empty()||propValue(*n,"reg")==reg)){receiverTarget=n;break;}
+    }
+    if(!receiverTarget)return false;
+
+    std::string replacement;
+    if(!receiverTarget->label.empty())replacement="&"+receiverTarget->label;
+    else{
+        uint32_t ph=nodePhandle(*receiverTarget);
+        if(!ph)return false;
+        char buf[16];
+        std::snprintf(buf,sizeof(buf),"0x%08x",ph);
+        replacement=buf;
+    }
+    translated=value;
+    translated.replace(open+1,first.size(),replacement);
+    return true;
+}
+
+bool unsafeTransferProperty(const std::string& name){
+    std::string p=lower(name);
+    if(p=="phandle"||p=="linux,phandle"||p=="compatible"||p=="reg"||p=="status")
+        return true;
+    if(p=="interrupt-parent"||p=="remote-endpoint")return true;
+    if(has(p,"pinctrl-")||has(p,"-supply")||has(p,"-clocks")||has(p,"-resets")||
+       p=="clocks"||p=="resets"||p=="dmas"||p=="mboxes"||p=="iommus"||
+       p=="phys"||p=="power-domains"||p=="io-channels")
+        return true;
+    return false;
+}
+
 void addControlItems(const DtbNode& donor,const DtbNode& receiver,std::vector<DtbTransferItem>& out){
     std::vector<const DtbNode*> dn,rn;
     collectNodes(donor,dn);collectNodes(receiver,rn);
@@ -505,7 +635,9 @@ void addOtherItems(const DtbNode& donor,const DtbNode& receiver,std::vector<DtbT
         if(!r)continue;
         std::vector<std::string> common;
         for(const auto& kv:n->properties){
-            if(r->properties.count(kv.first)&&r->properties.at(kv.first).value!=kv.second.value)
+            if(r->properties.count(kv.first)&&
+               r->properties.at(kv.first).value!=kv.second.value&&
+               !unsafeTransferProperty(kv.first))
                 common.push_back(kv.first);
         }
         if(common.empty())continue;
@@ -611,15 +743,26 @@ bool apply_transfer_item(DtbNode& receiver,const DtbNode& donor,const DtbTransfe
     if(!dn||!rn)return false;
 
     std::vector<std::string> props=item.propertyNames;
-    if(props.empty()&& !item.donorProperty.empty())props.push_back(item.donorProperty);
+    if(props.empty()&&!item.donorProperty.empty())props.push_back(item.donorProperty);
 
     int changed=0;
     for(const auto& p:props){
         auto di=dn->properties.find(p);
         auto ri=rn->properties.find(p);
         if(di==dn->properties.end()||ri==rn->properties.end())continue;
-        if(ri->second.value!=di->second.value){
-            ri->second.value=di->second.value;
+
+        std::string value=di->second.value;
+        if(item.category=="controls"&&(p=="gpio"||p=="gpios"||ends(p,"-gpios"))){
+            std::string translated;
+            if(!translateFirstPhandle(donor,receiver,value,translated))
+                return false;
+            value=translated;
+        }else if(unsafeTransferProperty(p)){
+            return false;
+        }
+
+        if(ri->second.value!=value){
+            ri->second.value=value;
             ++changed;
         }
     }
