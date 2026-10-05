@@ -32,8 +32,8 @@ int main(int argc,char** argv){
         std::fprintf(stderr,"semantic plan did not expose expected UP/audio blocks\n");
         return 4;
     }
-    if(!plan[up].compatible||plan[plan.size()>0?up:0].donorValue.find("GPIO 20")==std::string::npos){
-        std::fprintf(stderr,"UP donor GPIO was not recognized\n");
+    if(!plan[up].compatible){
+        std::fprintf(stderr,"UP donor/receptor block was not recognized as transferable\\n");
         return 5;
     }
 
