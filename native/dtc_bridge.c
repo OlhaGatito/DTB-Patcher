@@ -10,8 +10,24 @@
 #include "version_gen.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <setjmp.h>
 
 static char last_error[2048];
+static jmp_buf dtbp_exit_env;
+static volatile int dtbp_exit_active=0;
+
+/* DTC fatal helpers call exit(). In the standalone CLI that is fine; inside
+ * Gatito Dtb Pacher it would terminate the GUI. The native build compiles
+ * DTC with -Dexit=dtbp_dtc_exit so fatal DTC paths return here. */
+void dtbp_dtc_exit(int status){
+    if(dtbp_exit_active){
+        snprintf(last_error,sizeof(last_error),
+                 "DTC abortou a operacao (exit status %d). Consulte o log para a etapa exata.",status);
+        longjmp(dtbp_exit_env,1);
+    }
+    _Exit(status);
+}
 
 static void reset_state(void) {
     quiet=0; reservenum=0; minsize=0; padsize=0; alignsize=0;
@@ -26,18 +42,63 @@ const char* dtbp_dtc_version(void) { return DTC_VERSION; }
 
 int dtbp_dtc_decompile(const char* dtb_path,const char* dts_path) {
     reset_state();
+    dtbp_exit_active=1;
+    if(setjmp(dtbp_exit_env)!=0){
+        dtbp_exit_active=0;
+        return 99;
+    }
+
     struct dt_info* dti=dt_from_blob(dtb_path);
-    if(!dti){set_error("DTC could not parse the DTB.");return 1;}
-    FILE* out=fopen(dts_path,"wb");
-    if(!out){set_error("Could not create DTS output.");return 2;}
-    dt_to_source(out,dti); fclose(out); return 0;
+    if(!dti){set_error("DTC could not parse the DTB.");dtbp_exit_active=0;return 1;}
+
+    char tmp[4096];
+    snprintf(tmp,sizeof(tmp),"%s.gatito-tmp",dts_path);
+    remove(tmp);
+    FILE* out=fopen(tmp,"wb");
+    if(!out){set_error("Could not create DTS output.");dtbp_exit_active=0;return 2;}
+    dt_to_source(out,dti);
+    fclose(out);
+
+    if(rename(tmp,dts_path)!=0){
+        remove(tmp);
+        set_error("Could not finalize DTS output.");
+        dtbp_exit_active=0;
+        return 2;
+    }
+
+    dtbp_exit_active=0;
+    return 0;
 }
+
 int dtbp_dtc_compile(const char* dts_path,const char* dtb_path) {
     reset_state();
+    dtbp_exit_active=1;
+    if(setjmp(dtbp_exit_env)!=0){
+        dtbp_exit_active=0;
+        return 99;
+    }
+
     struct dt_info* dti=dt_from_source(dts_path);
-    if(!dti){set_error("DTC could not parse the DTS.");return 1;}
+    if(!dti){set_error("DTC could not parse the DTS.");dtbp_exit_active=0;return 1;}
+
     process_checks(false,dti);
-    FILE* out=fopen(dtb_path,"wb");
-    if(!out){set_error("Could not create DTB output.");return 2;}
-    dt_to_blob(out,dti,DEFAULT_FDT_VERSION); fclose(out); return 0;
+
+    char tmp[4096];
+    snprintf(tmp,sizeof(tmp),"%s.gatito-tmp",dtb_path);
+    remove(tmp);
+    FILE* out=fopen(tmp,"wb");
+    if(!out){set_error("Could not create DTB output.");dtbp_exit_active=0;return 2;}
+
+    dt_to_blob(out,dti,DEFAULT_FDT_VERSION);
+    fclose(out);
+
+    if(rename(tmp,dtb_path)!=0){
+        remove(tmp);
+        set_error("Could not finalize DTB output.");
+        dtbp_exit_active=0;
+        return 2;
+    }
+
+    dtbp_exit_active=0;
+    return 0;
 }
