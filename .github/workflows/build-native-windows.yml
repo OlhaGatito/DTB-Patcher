@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout DTB-Patcher
+      - name: Checkout Gatito Dtb Pacher
         uses: actions/checkout@v4
 
       - name: Install MSYS2
@@ -45,7 +45,7 @@ jobs:
           cd /tmp/dtc
           make NO_YAML=1 NO_PYTHON=1 dtc libfdt
 
-      - name: Compile native DTB-Patcher
+      - name: Compile native Gatito Dtb Pacher
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
@@ -53,7 +53,7 @@ jobs:
           mkdir -p build
           gcc -Dmain=dtc_internal_main -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c "$DTC/dtc.c" -o build/dtc_embedded.o
           gcc -DNO_YAML -I"$DTC" -I"$DTC/libfdt" -c native/dtc_bridge.c -o build/dtc_bridge.o
-          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/DTB-Patcher.exe
+          g++ -std=c++17 -O2 -mwindows -I"$DTC" -I"$DTC/libfdt" native/main.cpp native/dtb_model.cpp build/dtc_bridge.o build/dtc_embedded.o "$DTC/checks.o" "$DTC/data.o" "$DTC/flattree.o" "$DTC/fstree.o" "$DTC/livetree.o" "$DTC/srcpos.o" "$DTC/treesource.o" "$DTC/util.o" "$DTC/dtc-lexer.lex.o" "$DTC/dtc-parser.tab.o" "$DTC/libfdt/libfdt.a" -static -static-libgcc -static-libstdc++ -lgdiplus -lcomctl32 -o build/Gatito Dtb Pacher.exe
 
       - name: Native DTC smoke test
         shell: msys2 {0}
@@ -73,14 +73,14 @@ jobs:
       - name: Verify executable
         shell: pwsh
         run: |
-          if (!(Test-Path "build\\DTB-Patcher.exe")) { throw "Native executable was not produced." }
-          Get-Item "build\\DTB-Patcher.exe" | Select-Object FullName,Length
+          if (!(Test-Path "build\\Gatito Dtb Pacher.exe")) { throw "Native executable was not produced." }
+          Get-Item "build\\Gatito Dtb Pacher.exe" | Select-Object FullName,Length
 
       - name: Verify runtime dependencies
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
-          deps="$(ldd build/DTB-Patcher.exe 2>/dev/null || true)"
+          deps="$(ldd build/Gatito Dtb Pacher.exe 2>/dev/null || true)"
           echo "$deps"
           if echo "$deps" | grep -Eiq 'libwinpthread|libstdc\+\+-6|libgcc_s_seh'; then
             echo "Standalone runtime check failed: MinGW runtime DLL dependency detected."
@@ -89,10 +89,10 @@ jobs:
 
       - name: Package
         shell: pwsh
-        run: Compress-Archive -Path build\\DTB-Patcher.exe -DestinationPath DTB-Patcher-Windows-Native.zip -Force
+        run: Compress-Archive -Path build\\Gatito Dtb Pacher.exe -DestinationPath Gatito Dtb Pacher-Windows-Native.zip -Force
 
       - name: Upload native build
         uses: actions/upload-artifact@v4
         with:
-          name: DTB-Patcher-Windows-Native
-          path: DTB-Patcher-Windows-Native.zip
+          name: Gatito Dtb Pacher-Windows-Native
+          path: Gatito Dtb Pacher-Windows-Native.zip
