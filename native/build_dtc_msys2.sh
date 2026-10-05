@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-$PWD}}"
+PROJECT_DIR="SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-$(dirname -- "$SCRIPT_DIR")}}""
 DTC_DIR="${2:-/tmp/gatito-dtb-pacher-dtc}"
 DTC_REPO="https://github.com/dgibson/dtc.git"
 DTC_COMMIT="7a1e017926004ecff5fce62d62d42ce9f3e00082"
