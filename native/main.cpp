@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <map>
 #include <exception>
-#include <sstream>
 #include "dtc_bridge.h"
 #include "dtb_model.hpp"
 
@@ -63,8 +62,7 @@ static void logLine(const std::string&s){
  if(!g_log)return;
  int n=GetWindowTextLengthA(g_log);
  SendMessageA(g_log,EM_SETSEL,n,n);
- std::string x=s+"\r
-";
+ std::string x=s+"\\r\\n";
  SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
 }
 static void setStatus(const std::string&s){if(g_status)setText(g_status,s);}
@@ -259,18 +257,14 @@ static void build(){
   std::error_code ec;
   fs::create_directories(dir,ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\r
-"+dir.string()+"\r
-\r
-"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\\r\\n"+dir.string()+"\\r\\n\\r\\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
   int n=1;fs::path out;
   do{out=dir/("patch-"+std::to_string(n++)+".dtb");}while(fs::exists(out,ec)&&!ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\r
-"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\\r\\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
@@ -337,6 +331,8 @@ static void drawSarue(Graphics& g,float x,float y,float s){
  g.DrawLine(&outline,x+64*s,y+76*s,x+54*s,y+79*s);g.DrawLine(&outline,x+64*s,y+76*s,x+74*s,y+79*s);
 }
 
+static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius);
+
 static void drawIcon(Graphics& g,int kind,float x,float y,float s){
  Pen p(Color(255,196,104,110),2.5f*s);
  SolidBrush b(Color(255,196,104,110));
@@ -351,13 +347,13 @@ static void drawIcon(Graphics& g,int kind,float x,float y,float s){
  }else if(kind==2){
   g.DrawRectangle(&p,x+5*s,y+8*s,58*s,32*s);g.DrawLine(&p,x+25*s,y+48*s,x+43*s,y+48*s);g.DrawLine(&p,x+34*s,y+40*s,x+34*s,y+48*s);
  }else if(kind==3){
-  g.DrawRoundedRectangle(&p, x+10*s,y+8*s,46*s,32*s,4*s,4*s);g.FillRectangle(&b,x+56*s,y+18*s,7*s,12*s);g.FillRectangle(&b,x+15*s,y+13*s,30*s,22*s);
+  roundFill(g,b,p,(int)(x+10*s),(int)(y+8*s),(int)(46*s),(int)(32*s),4.0f);g.FillRectangle(&b,x+56*s,y+18*s,7*s,12*s);g.FillRectangle(&b,x+15*s,y+13*s,30*s,22*s);
  }else{
   g.DrawEllipse(&p,x+10*s,y+10*s,45*s,45*s);g.DrawLine(&p,x+18*s,y+47*s,x+49*s,y+16*s);g.DrawLine(&p,x+18*s,y+16*s,x+49*s,y+47*s);
  }
 }
 
-static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius){ GraphicsPath path; path.AddArc(x,y,radius,radius,180,90); path.AddArc(x+w-radius,y,radius,radius,270,90); path.AddArc(x+w-radius,y+h-radius,radius,radius,0,90); path.AddArc(x,y+h-radius,radius,radius,90,90); path.CloseFigure(); g.FillPath(&br,&path); g.DrawPath(&pn,&path); }
+static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius){ GraphicsPath path; REAL X=(REAL)x,Y=(REAL)y,W=(REAL)w,H=(REAL)h,R=(REAL)radius; path.AddArc(X,Y,R,R,180.0f,90.0f); path.AddArc(X+W-R,Y,R,R,270.0f,90.0f); path.AddArc(X+W-R,Y+H-R,R,R,0.0f,90.0f); path.AddArc(X,Y+H-R,R,R,90.0f,90.0f); path.CloseFigure(); g.FillPath(&br,&path); g.DrawPath(&pn,&path); }
 
 static void drawCard(Graphics& g,int x,int y,int w,int h,int kind,int count){
  SolidBrush br(Color(255,255,253,249));Pen pn(Color(255,224,216,205),1.2f);
@@ -489,15 +485,7 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
    case ID_ANALYZE:analyze();break;
    case ID_BUILD:build();break;
    case ID_ABOUT:{
-    const char* msg="DTB-Patcher\
-\
-Doador -> analise -> selecao -> novo DTB.\
-\
-Os arquivos originais nunca sao sobrescritos.\
-DTC integrado no mesmo processo.\
-\
-Mascote: Sarue / Gatito-Ports.";
-    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
+    const char* msg="DTB-Patcher\\r\\n\\r\\nDoador -> analise -> selecao -> novo DTB.\\r\\n\\r\\nOs arquivos originais nunca sao sobrescritos.\\r\\nDTC integrado no mesmo processo.\\r\\n\\r\\nMascote: Sarue / Gatito-Ports.";\n    MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
    }
   }break;
  case WM_DESTROY:PostQuitMessage(0);break;
@@ -516,7 +504,7 @@ static HWND makeList(HWND parent,HINSTANCE hi,int id){
  return lv;
 }
 
-int WINAPI WinMain(HINSTANCE hi,HINSTANCE,HINSTANCE,LPSTR,int){
+int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
  try{
   GdiplusStartupInput gi;
   if(GdiplusStartup(&g_gdiplus,&gi,nullptr)!=Ok)return 1;
@@ -559,8 +547,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,HINSTANCE,LPSTR,int){
 
   for(int i=0;i<5;i++)g_lists[i]=makeList(g_main,hi,ID_LIST_CONTROLS+i);
 
-  g_log=CreateWindowA("EDIT","Log de operacao:\r
-",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
+  g_log=CreateWindowA("EDIT","Log de operacao:\\r\\n",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_log,9);
   g_status=CreateWindowA("STATIC","Pronto. Selecione os dois DTBs para comecar.",WS_CHILD|WS_VISIBLE|SS_CENTER,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_status,9,true);
