@@ -62,7 +62,8 @@ static void logLine(const std::string&s){
  if(!g_log)return;
  int n=GetWindowTextLengthA(g_log);
  SendMessageA(g_log,EM_SETSEL,n,n);
- std::string x=s+"\r\n";
+ std::string x=s+"\r
+";
  SendMessageA(g_log,EM_REPLACESEL,FALSE,(LPARAM)x.c_str());
 }
 static void setStatus(const std::string&s){if(g_status)setText(g_status,s);}
@@ -257,14 +258,18 @@ static void build(){
   std::error_code ec;
   fs::create_directories(dir,ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\r\n"+dir.string()+"\r\n\r\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel criar a pasta de saida:\r
+"+dir.string()+"\r
+\r
+"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
   int n=1;fs::path out;
   do{out=dir/("patch-"+std::to_string(n++)+".dtb");}while(fs::exists(out,ec)&&!ec);
   if(ec){
-   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\r\n"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
+   MessageBoxA(g_main,("Nao foi possivel verificar o proximo nome de saida:\r
+"+ec.message()).c_str(),"Gerar novo DTB",MB_ICONERROR);
    return;
   }
 
@@ -294,7 +299,9 @@ static void build(){
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }catch(...){
   logLine("ERRO AO GERAR: excecao desconhecida.");
-  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\r\n\r\nOs arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
+  MessageBoxA(g_main,"Ocorreu um erro inesperado ao gerar o novo DTB.\r
+\r
+Os arquivos originais nao foram alterados.","DTB-Patcher",MB_ICONERROR);
   setStatus("Falha controlada. Os DTBs originais nao foram alterados.");
  }
 }
@@ -335,7 +342,9 @@ static void drawIcon(Graphics& g,int kind,float x,float y,float s){
  }
 }
 
-static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius){ GraphicsPath path; path.AddArc(x,y,radius,radius,180,90); path.AddArc(x+w-radius,y,radius,radius,270,90); path.AddArc(x+w-radius,y+h-radius,radius,radius,0,90); path.AddArc(x,y+h-radius,radius,radius,90,90); path.CloseFigure(); g.FillPath(&br,&path); g.DrawPath(&pn,&path); }\n\nstatic void drawCard(Graphics& g,int x,int y,int w,int h,int kind,int count){
+static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h,float radius){ GraphicsPath path; path.AddArc(x,y,radius,radius,180,90); path.AddArc(x+w-radius,y,radius,radius,270,90); path.AddArc(x+w-radius,y+h-radius,radius,radius,0,90); path.AddArc(x,y+h-radius,radius,radius,90,90); path.CloseFigure(); g.FillPath(&br,&path); g.DrawPath(&pn,&path); }
+
+static void drawCard(Graphics& g,int x,int y,int w,int h,int kind,int count){
  SolidBrush br(Color(255,255,253,249));Pen pn(Color(255,224,216,205),1.2f);
  roundFill(g,br,pn,x,y,w,h,10.0f);
  drawIcon(g,kind,(float)x+10,(float)y+7,0.65f);
@@ -344,7 +353,8 @@ static void roundFill(Graphics& g,SolidBrush& br,Pen& pn,int x,int y,int w,int h
  std::wstring wt;for(char c:std::string(categoryTitle(kind)))wt.push_back((wchar_t)(unsigned char)c);
  std::wstring wd;for(char c:std::string(categoryDescription(kind)))wd.push_back((wchar_t)(unsigned char)c);
  g.DrawString(wt.c_str(),-1,&title,PointF((REAL)x+56,(REAL)y+9),&txt);
- g.DrawString(wd.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+28),&mut);\n std::wstring wc=std::to_wstring(count)+L" item(ns)"; g.DrawString(wc.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+41),&mut);
+ g.DrawString(wd.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+28),&mut);
+ std::wstring wc=std::to_wstring(count)+L" item(ns)"; g.DrawString(wc.c_str(),-1,&small,PointF((REAL)x+56,(REAL)y+41),&mut);
 }
 
 static HFONT makeFont(int size,bool bold=false){
@@ -362,7 +372,9 @@ static void layout(){
  int colW=(W-2*margin-gap)/2;
  int rowH=62;
 
- MoveWindow(g_donorLabel,margin,y+28,80,20,TRUE);\n MoveWindow(g_receiverLabel,margin,y+28+rowH,80,20,TRUE);\n MoveWindow(g_donor,margin+90,y+26,colW-170,30,TRUE);
+ MoveWindow(g_donorLabel,margin,y+28,80,20,TRUE);
+ MoveWindow(g_receiverLabel,margin,y+28+rowH,80,20,TRUE);
+ MoveWindow(g_donor,margin+90,y+26,colW-170,30,TRUE);
  MoveWindow(g_receiver,margin+90,y+26+rowH,colW-170,30,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_DONOR),W-margin-72,y+26,72,30,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_RECEIVER),W-margin-72,y+26+rowH,72,30,TRUE);
@@ -372,7 +384,8 @@ static void layout(){
  int rightX=margin+colW+gap;
  MoveWindow(GetDlgItem(g_main,ID_SWAP),rightX,y+8,180,32,TRUE);
  MoveWindow(GetDlgItem(g_main,ID_ANALYZE),rightX+190,y+8,145,32,TRUE);
- MoveWindow(GetDlgItem(g_main,ID_BUILD),rightX,y+46,335,34,TRUE);\n MoveWindow(GetDlgItem(g_main,ID_ABOUT),W-margin-80,18,80,30,TRUE);
+ MoveWindow(GetDlgItem(g_main,ID_BUILD),rightX,y+46,335,34,TRUE);
+ MoveWindow(GetDlgItem(g_main,ID_ABOUT),W-margin-80,18,80,30,TRUE);
 
  int cardsTop=y+2*rowH+18;
  int available=H-cardsTop-112;
@@ -455,7 +468,14 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
    case ID_ANALYZE:analyze();break;
    case ID_BUILD:build();break;
    case ID_ABOUT:{
-    const char* msg="DTB-Patcher\\n\\nDoador -> analise -> selecao -> novo DTB.\\n\\nOs arquivos originais nunca sao sobrescritos.\\nDTC integrado no mesmo processo.\\n\\nMascote: Sarue / Gatito-Ports.";
+    const char* msg="DTB-Patcher\
+\
+Doador -> analise -> selecao -> novo DTB.\
+\
+Os arquivos originais nunca sao sobrescritos.\
+DTC integrado no mesmo processo.\
+\
+Mascote: Sarue / Gatito-Ports.";
     MessageBoxA(g_main,msg,"Sobre o DTB-Patcher",MB_OK|MB_ICONINFORMATION);break;
    }
   }break;
@@ -518,7 +538,8 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,HINSTANCE,LPSTR,int){
 
   for(int i=0;i<5;i++)g_lists[i]=makeList(g_main,hi,ID_LIST_CONTROLS+i);
 
-  g_log=CreateWindowA("EDIT","Log de operacao:\r\n",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
+  g_log=CreateWindowA("EDIT","Log de operacao:\r
+",WS_CHILD|WS_VISIBLE|WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_log,9);
   g_status=CreateWindowA("STATIC","Pronto. Selecione os dois DTBs para comecar.",WS_CHILD|WS_VISIBLE|SS_CENTER,0,0,100,60,g_main,nullptr,hi,nullptr);
   setFont(g_status,9,true);
