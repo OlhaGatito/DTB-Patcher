@@ -68,6 +68,17 @@ jobs:
           if (!(Test-Path "build\\DTB-Patcher.exe")) { throw "Native executable was not produced." }
           Get-Item "build\\DTB-Patcher.exe" | Select-Object FullName,Length
 
+      - name: Verify runtime dependencies
+        shell: msys2 {0}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          deps="$(ldd build/DTB-Patcher.exe 2>/dev/null || true)"
+          echo "$deps"
+          if echo "$deps" | grep -Eiq 'libwinpthread|libstdc\+\+-6|libgcc_s_seh'; then
+            echo "Standalone runtime check failed: MinGW runtime DLL dependency detected."
+            exit 1
+          fi
+
       - name: Package
         shell: pwsh
         run: Compress-Archive -Path build\\DTB-Patcher.exe -DestinationPath DTB-Patcher-Windows-Native.zip -Force
