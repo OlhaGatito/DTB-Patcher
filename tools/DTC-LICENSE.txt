@@ -1,10 +1,23 @@
 Device Tree Compiler (dtc)
 
-Gatito Dtb Pacher uses the Device Tree Compiler from:
+Upstream project:
 https://github.com/dgibson/dtc
 
-The upstream dtc project is distributed under the GNU General Public License v2.0 (GPL-2.0).
+The Gatito Dtb Pacher build incorporates DTC source code under
+GPL-2.0-or-later.
 
-This file documents the upstream component and its license. The corresponding source is available from the upstream repository above.
+The native build pins DTC to commit:
+7a1e017926004ecff5fce62d62d42ce9f3e00082
 
-Gatito Dtb Pacher does not modify the dtc source code when building it for Windows.
+The build performs a small mechanical source adaptation required by the
+in-process bridge: the upstream private fill_fullpaths helper is exported
+under the dtbp_fill_fullpaths name. The build also compiles the DTC entry
+point with a renamed main symbol and redirects fatal exit() calls to the
+Gatito bridge. These adaptations are part of the build integration and do
+not change the upstream licensing.
+
+The corresponding DTC source is fetched from the upstream repository at
+the pinned commit during the build.
+
+See LICENSE for this project's GPL licensing and THIRD-PARTY-NOTICES.md
+for the third-party component notice.
