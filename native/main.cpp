@@ -439,6 +439,7 @@ static void analyze(){
 
         setStatus(std::to_string(compatible)+" bloco(s) compativel(is). "
                   "Marque no Doador o que deseja transferir.");
+        updatePreview();
     }catch(const std::exception& e){
         logLine(std::string("ERRO NA ANALISE: ")+e.what());
         MessageBoxA(g_main,e.what(),"Erro durante a analise",MB_OK|MB_ICONERROR);
