@@ -23,7 +23,7 @@ int main(int argc,char**argv){
     int badRc=dtbp_dtc_compile(bad.c_str(),badOut.c_str());
     if(badRc==0){
         std::fprintf(stderr,"Invalid DTS unexpectedly compiled.\\n");
-        return 6;
+        return 8;
     }
     std::printf("DTC fatal-error trap test OK: rc=%d\\n",badRc);
     std::printf("DTC native smoke test OK: %s\n",dtbp_dtc_version());
