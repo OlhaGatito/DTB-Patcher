@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gatito DTB-Patcher — Interface</title>
+<style>
+:root{
+  --bg:#061321; --panel:#0b1b2d; --panel2:#0e2237; --line:#1e4161;
+  --text:#e9f3ff; --muted:#8fa8bd; --blue:#087cff; --cyan:#19bdf2;
+  --green:#12c98a; --red:#ff5360; --gray:#7f96aa; --purple:#7d67ff;
+}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(145deg,#04101c,#081b2e 55%,#061321);color:var(--text);font:13px Segoe UI,Arial,sans-serif;font-family:'Segoe UI',Arial,sans-serif}
+button,input{font:inherit} button{color:var(--text);background:#091a2b;border:1px solid #285477;border-radius:6px;cursor:pointer;padding:6px 12px}
+button:hover{background:#102942;border-color:#3a78a5}.app{min-height:100vh;padding:8px}
+header{border:1px solid #214665;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:12px;background:#071727}
+.logo{font-size:35px}.title{flex:1}.title h1{font-size:21px;margin:0 0 2px}.title p{margin:0;color:#a8bfd3;font-size:11px}.actions{display:grid;gap:4px;width:175px}.actions button{height:25px;font-size:11px}
+.files{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.filebox{border:1px solid #214665;border-radius:7px;padding:7px;background:#081a2b}.filehead{font-weight:700;margin-bottom:5px}.fileline{display:flex;gap:6px}.fileline input{flex:1;min-width:0;background:#061321;border:1px solid #245274;color:#dcecff;border-radius:5px;padding:6px;font-size:11px}.fileline button{padding:0 12px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);margin-top:8px;border:1px solid #204765;border-radius:7px;overflow:hidden}.tab{height:42px;border:0;border-right:1px solid #204765;border-radius:0;background:#081a2b;cursor:pointer;color:var(--muted);padding:0}.tab:last-child{border:0}.tab.active{background:linear-gradient(#087fff,#0565d6);font-weight:700;color:white}
+main{margin-top:8px}.page{display:none}.page.active{display:block}.sectionHead{display:flex;align-items:center;gap:12px;border:1px solid #214665;border-radius:7px;background:#091b2c;padding:10px;position:relative;min-height:76px}
+.icon{font-size:29px}.sectionHead h2{margin:0;font-size:20px}.sectionHead p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.block-summary{margin-left:auto;display:grid;grid-template-columns:auto auto;gap:3px 18px;min-width:315px;border:1px solid #234c6d;border-radius:6px;padding:7px 10px;background:#071727;font-size:10px;color:#91a9bc}
+.block-summary b:first-child{grid-column:1/-1;color:#dcecff;font-size:11px}.block-summary span b{color:#fff}
+.comparison-page{display:grid;grid-template-columns:1fr 45px 1fr;gap:8px;margin-top:8px}
+.card{border:1px solid #214665;border-radius:7px;background:#081a2b;padding:9px}.card h3{margin:0 0 8px;font-size:12px}
+.list{border:1px solid #214665;border-radius:5px;overflow:hidden;max-height:300px;overflow-y:auto}.row{display:grid;grid-template-columns:25px 1fr auto;gap:6px;padding:7px;border-bottom:1px solid #173852;align-items:center}
+.row:last-child{border:0}.row.selected{background:linear-gradient(90deg,#064e43,#073d38);border-left:3px solid var(--green)}.row.diff{background:#0b2034}.row.bad{background:#3a1820;color:#ffb3b9}
+.check{accent-color:var(--green)}.sub{display:block;color:#7793aa;font-size:9px;margin-top:2px}
+.transfer-arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--green)}
+.legend{margin-top:8px;color:#b5cadb;font-size:10px}.dot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:7px;vertical-align:-2px;background:var(--green)}.dot.b{background:#1685ff}.dot.r{background:var(--red)}.dot.x{background:#8198ad}
+.summary{border:1px solid #214665;border-radius:7px;padding:10px;background:#091b2c;margin-top:8px;color:#a9c0d3;font-size:11px}
+.log{margin-top:8px;border:1px solid #214665;border-radius:7px;background:#061522;padding:7px;color:#7ed7ff;font:10px Consolas,monospace;min-height:96px;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word}
+footer{margin-top:8px;border:1px solid #214665;border-radius:7px;padding:8px;color:#8fa8bd;display:flex;justify-content:space-between;font-size:11px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">🐱</div>
+  <div class="title">
+    <h1>Gatito DTB-Patcher</h1>
+    <p>Compare blocos funcionais e transfira somente o que o Doador fornece</p>
+    <p>Doador → Receptor | Receptor = base do novo DTB</p>
+  </div>
+  <div class="actions">
+    <button id="swapBtn">⇄ Trocar</button>
+    <button id="analyzeBtn">⌕ Analisar</button>
+    <button id="buildBtn">⚙ Gerar</button>
+  </div>
+</header>
+
+<div class="files">
+  <div class="filebox">
+    <div class="filehead">🎮 Doador (Origem)</div>
+    <div class="fileline">
+      <input id="donorFile" placeholder="Selecione um DTB..." readonly>
+      <button id="donorSelectBtn">Selecionar</button>
+    </div>
+  </div>
+  <div class="filebox">
+    <div class="filehead">🎮 Receptor (Base)</div>
+    <div class="fileline">
+      <input id="receiverFile" placeholder="Selecione um DTB..." readonly>
+      <button id="receiverSelectBtn">Selecionar</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="0">🎮 Controles</button>
+  <button class="tab" data-tab="1">🔊 Áudio</button>
+  <button class="tab" data-tab="2">🖥 Display</button>
+  <button class="tab" data-tab="3">🔋 Energia</button>
+  <button class="tab" data-tab="4">🛠 Outros</button>
+</nav>
+
+<main>
+<section id="controles" class="page active">
+  <div class="sectionHead">
+    <div class="icon">🎮</div>
+    <div>
+      <h2>Controles</h2>
+      <p>Analógicos, botões físicos e GPIOs necessários para o funcionamento dos controles.</p>
+    </div>
+    <div class="block-summary">
+      <b>Resumo do bloco</b>
+      <span>Total Doador: <b id="donorCount0">—</b></span>
+      <span>Total Receptor: <b id="receiverCount0">—</b></span>
+      <span>Selecionados: <b id="selectedCount0">—</b></span>
+    </div>
+  </div>
+  <div class="comparison-page">
+    <div class="card"><h3>🎮 Doador</h3><div class="list" id="list0-donor"></div></div>
+    <div class="transfer-arrow">→</div>
+    <div class="card"><h3>🎮 Receptor</h3><div class="list" id="list0-receiver"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <div class="card">
+      <h3>Legenda</h3>
+      <div class="legend">
+        <div><i class="dot"></i>Selecionado (será transferido)</div>
+        <div><i class="dot b"></i>Diferença existente</div>
+        <div><i class="dot r"></i>Incompatível</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>ℹ Informação</h3>
+      <p style="margin:0;font-size:10px">A transferência ocorre do <b>Doador</b> para o <b>Receptor</b>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="audio" class="page">
+  <div class="sectionHead">
+    <div class="icon">🔊</div>
+    <div>
+      <h2>Áudio</h2>
+      <p>Codecs, I2S, DAI e roteamento de áudio.</p>
+    </div>
+    <div class="block-summary">
+      <b>Resumo do bloco</b>
+      <span>Total Doador: <b id="donorCount1">—</b></span>
+      <span>Total Receptor: <b id="receiverCount1">—</b></span>
+      <span>Selecionados: <b id="selectedCount1">—</b></span>
+    </div>
+  </div>
+  <div class="comparison-page">
+    <div class="card"><h3>🔊 Doador</h3><div class="list" id="list1-donor"></div></div>
+    <div class="transfer-arrow">→</div>
+    <div class="card"><h3>🔊 Receptor</h3><div class="list" id="list1-receiver"></div></div>
+  </div>
+</section>
+
+<section id="display" class="page">
+  <div class="sectionHead">
+    <div class="icon">🖥</div>
+    <div>
+      <h2>Display</h2>
+      <p>Painel, backlight e vídeo.</p>
+    </div>
+    <div class="block-summary">
+      <b>Resumo do bloco</b>
+      <span>Total Doador: <b id="donorCount2">—</b></span>
+      <span>Total Receptor: <b id="receiverCount2">—</b></span>
+      <span>Selecionados: <b id="selectedCount2">—</b></span>
+    </div>
+  </div>
+  <div class="comparison-page">
+    <div class="card"><h3>🖥 Doador</h3><div class="list" id="list2-donor"></div></div>
+    <div class="transfer-arrow">→</div>
+    <div class="card"><h3>🖥 Receptor</h3><div class="list" id="list2-receiver"></div></div>
+  </div>
+</section>
+
+<section id="energia" class="page">
+  <div class="sectionHead">
+    <div class="icon">🔋</div>
+    <div>
+      <h2>Energia</h2>
+      <p>Bateria, carregador e ADC.</p>
+    </div>
+    <div class="block-summary">
+      <b>Resumo do bloco</b>
+      <span>Total Doador: <b id="donorCount3">—</b></span>
+      <span>Total Receptor: <b id="receiverCount3">—</b></span>
+      <span>Selecionados: <b id="selectedCount3">—</b></span>
+    </div>
+  </div>
+  <div class="comparison-page">
+    <div class="card"><h3>🔋 Doador</h3><div class="list" id="list3-donor"></div></div>
+    <div class="transfer-arrow">→</div>
+    <div class="card"><h3>🔋 Receptor</h3><div class="list" id="list3-receiver"></div></div>
+  </div>
+</section>
+
+<section id="outros" class="page">
+  <div class="sectionHead">
+    <div class="icon">🛠</div>
+    <div>
+      <h2>Outros</h2>
+      <p>Outras diferenças encontradas.</p>
+    </div>
+    <div class="block-summary">
+      <b>Resumo do bloco</b>
+      <span>Total Doador: <b id="donorCount4">—</b></span>
+      <span>Total Receptor: <b id="receiverCount4">—</b></span>
+      <span>Selecionados: <b id="selectedCount4">—</b></span>
+    </div>
+  </div>
+  <div class="comparison-page">
+    <div class="card"><h3>🛠 Doador</h3><div class="list" id="list4-donor"></div></div>
+    <div class="transfer-arrow">→</div>
+    <div class="card"><h3>🛠 Receptor</h3><div class="list" id="list4-receiver"></div></div>
+  </div>
+</section>
+</main>
+
+<div class="log" id="log"></div>
+
+<footer>
+  <span>Status: <span id="status">Pronto</span></span>
+  <span>Gatito DTB-Patcher Web | ROCKNIX</span>
+</footer>
+</div>
+
+<!-- Load WASM module -->
+<script async src="wasm/gatito_dtb_patcher.js"></script>
+<!-- Load application logic -->
+<script src="js/app.js"></script>
+</body>
+</html>
