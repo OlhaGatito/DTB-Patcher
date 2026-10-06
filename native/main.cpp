@@ -1,5 +1,5 @@
 /*
- * Gatito Dtb Pacher native Windows GUI.
+ * Gatito DTB-Patcher native Windows GUI.
  *
  * UI model:
  *   Doador -> semantic comparison -> explicit donor selection -> Receiver base
@@ -83,11 +83,11 @@ static std::string diagnosticsPath(){
     try{
         const char* home=std::getenv("USERPROFILE");
         if(!home||!*home)return {};
-        fs::path dir=fs::path(home)/"Documents"/"Gatito Dtb Pacher"/"Logs";
+        fs::path dir=fs::path(home)/"Documents"/"Gatito DTB-Patcher"/"Logs";
         std::error_code ec;
         fs::create_directories(dir,ec);
         if(ec)return {};
-        return (dir/"gatito-dtb-pacher.log").string();
+        return (dir/"gatito-dtb-patcher.log").string();
     }catch(...){return {};}
 }
 
@@ -370,7 +370,7 @@ static void updatePreview(){
         std::string text=readWholeFile(p);
         removeTempFile(p);
         if(text.empty())text="O preview ficou vazio.";
-        std::string header="GATITO DTB PACHER — PREVIEW DO DTS FINAL\\r\\n"
+        std::string header="GATITO DTB-PATCHER — PREVIEW DO DTS FINAL\\r\\n"
                            "Base: RECEPTOR | Blocos selecionados do DOADOR: "+
                            std::to_string(applied)+"\\r\\n"
                            "O arquivo binario sera compilado deste DTS.\\r\\n"
@@ -393,13 +393,13 @@ static void analyze(){
             MessageBoxA(g_main,
                 "Selecione um DTB Doador e um DTB Receptor.\r\n\r\n"
                 "O Doador fornece os blocos selecionados; o Receptor permanece como base.",
-                "Gatito Dtb Pacher",MB_OK|MB_ICONWARNING);
+                "Gatito DTB-Patcher",MB_OK|MB_ICONWARNING);
             return;
         }
         if(!fs::is_regular_file(d)||!fs::is_regular_file(r)){
             MessageBoxA(g_main,
                 "Um dos caminhos selecionados nao aponta para um arquivo DTB valido.",
-                "Gatito Dtb Pacher",MB_OK|MB_ICONERROR);
+                "Gatito DTB-Patcher",MB_OK|MB_ICONERROR);
             return;
         }
 
@@ -475,7 +475,7 @@ static void analyze(){
         logLine("ERRO NA ANALISE: excecao desconhecida.");
         MessageBoxA(g_main,
             "Ocorreu um erro inesperado durante a analise.",
-            "Gatito Dtb Pacher",MB_OK|MB_ICONERROR);
+            "Gatito DTB-Patcher",MB_OK|MB_ICONERROR);
         setStatus("Falha controlada. Nenhum DTB original foi alterado.");
     }
 }
@@ -527,7 +527,7 @@ static bool nextOutputPath(fs::path& out){
     const char* home=std::getenv("USERPROFILE");
     if(!home||!*home)return false;
 
-    fs::path dir=fs::path(home)/"Documents"/"Gatito Dtb Pacher"/"New dtb";
+    fs::path dir=fs::path(home)/"Documents"/"Gatito DTB-Patcher"/"New dtb";
     std::error_code ec;
     fs::create_directories(dir,ec);
     if(ec)return false;
@@ -583,7 +583,7 @@ static void build(){
         if(!nextOutputPath(out)){
             MessageBoxA(g_main,
                 "Nao foi possivel criar/verificar a pasta de saida:\r\n"
-                "Documents\\Gatito Dtb Pacher\\New dtb",
+                "Documents\\Gatito DTB-Patcher\\New dtb",
                 "Gerar novo DTB",MB_OK|MB_ICONERROR);
             setStatus("Falha ao preparar a pasta de saida.");
             return;
@@ -713,7 +713,7 @@ static void build(){
         MessageBoxA(g_main,
             "Ocorreu um erro inesperado ao gerar o novo DTB.\r\n\r\n"
             "Os arquivos originais nao foram alterados.",
-            "Gatito Dtb Pacher",MB_OK|MB_ICONERROR);
+            "Gatito DTB-Patcher",MB_OK|MB_ICONERROR);
         setStatus("Falha controlada. O programa continua aberto.");
     }
 }
@@ -1001,7 +1001,7 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
             SolidBrush wt(Color(255,255,250,245));
             SolidBrush ws(Color(255,226,214,207));
 
-            g.DrawString(L"Gatito Dtb Pacher",-1,&t,PointF(118,20),&wt);
+            g.DrawString(L"Gatito DTB-Patcher",-1,&t,PointF(118,20),&wt);
             g.DrawString(
                 L"Compare blocos funcionais e transfira somente o que o Doador fornece",
                 -1,&s,PointF(120,60),&ws);
@@ -1130,13 +1130,13 @@ static LRESULT CALLBACK wndProc(HWND h,UINT m,WPARAM w,LPARAM l){
 
                 case ID_ABOUT:{
                     const char* msg=
-                        "Gatito Dtb Pacher\r\n\r\n"
+                        "Gatito DTB-Patcher\r\n\r\n"
                         "Doador -> comparacao funcional -> selecao -> Receptor como base -> novo DTB.\r\n\r\n"
                         "Os arquivos originais nunca sao sobrescritos.\r\n"
                         "O DTC oficial e integrado no mesmo processo.\r\n"
                         "Somente propriedades existentes no Receptor sao substituidas.\r\n\r\n"
                         "Mascote: Sarue / Gatito-Ports.";
-                    MessageBoxA(g_main,msg,"Sobre o Gatito Dtb Pacher",
+                    MessageBoxA(g_main,msg,"Sobre o Gatito DTB-Patcher",
                                  MB_OK|MB_ICONINFORMATION);
                     break;
                 }
@@ -1183,7 +1183,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
         g_logPath=diagnosticsPath();
         std::set_terminate(gatitoTerminate);
         SetUnhandledExceptionFilter(gatitoUnhandledException);
-        fileLog("=== GATITO DTB PACHER START ===");
+        fileLog("=== GATITO DTB-PATCHER START ===");
         fileLog("PID="+std::to_string(GetCurrentProcessId()));
         GdiplusStartupInput gi;
         fileLog("Inicializando GDI+ e controles Win32.");
@@ -1200,13 +1200,13 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE,LPSTR,int){
         WNDCLASSA wc{};
         wc.hInstance=hi;
         wc.lpfnWndProc=wndProc;
-        wc.lpszClassName="GatitoDtbPacherNative";
+        wc.lpszClassName="GatitoDtbPatcherNative";
         wc.hCursor=LoadCursorA(nullptr,IDC_ARROW);
         wc.hbrBackground=(HBRUSH)GetStockObject(NULL_BRUSH);
         RegisterClassA(&wc);
 
         g_main=CreateWindowA(
-            "GatitoDtbPacherNative","Gatito Dtb Pacher",
+            "GatitoDtbPatcherNative","Gatito DTB-Patcher",
             WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,
             0,0,1440,900,nullptr,nullptr,hi,nullptr);
 

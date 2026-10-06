@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions
 
-title Gatito Dtb Pacher - Native Windows Build
+title Gatito DTB-Patcher - Native Windows Build
 
 echo.
 echo ================================================
-echo          Gatito Dtb Pacher - Native C++ Build
+echo          Gatito DTB-Patcher - Native C++ Build
 echo ================================================
 echo.
 
@@ -52,25 +52,25 @@ echo.
 if errorlevel 1 goto :error_dtc
 
 echo.
-echo [2/3] Compilando o Gatito Dtb Pacher e executando os testes...
+echo [2/3] Compilando o Gatito DTB-Patcher e executando os testes...
 echo.
 
-"%BASH%" native/build_native_msys2.sh /tmp/gatito-dtb-pacher-dtc
+"%BASH%" native/build_native_msys2.sh /tmp/gatito-dtb-patcher-dtc
 if errorlevel 1 goto :error_tests
 
-if not exist "build\Gatito-Dtb-Pacher.exe" goto :error_missing
+if not exist "build\Gatito-DTB-Patcher.exe" goto :error_missing
 
 echo.
 echo [3/3] Validando o executavel...
 echo.
-"%BASH%" -lc "test -s build/Gatito-Dtb-Pacher.exe"
+"%BASH%" -lc "test -s build/Gatito-DTB-Patcher.exe"
 if errorlevel 1 goto :error_validate
 
 echo.
 echo [OK] Build e todos os testes concluidos.
 echo.
 echo Executavel:
-echo %PROJECT_DIR%\build\Gatito-Dtb-Pacher.exe
+echo %PROJECT_DIR%\build\Gatito-DTB-Patcher.exe
 echo.
 echo ================================================
 echo              BUILD CONCLUIDO

@@ -1,5 +1,5 @@
 /*
- * Gatito Dtb Pacher native DTC bridge.
+ * Gatito DTB-Patcher native DTC bridge.
  *
  * The implementation deliberately uses the upstream DTC front-end APIs
  * instead of reimplementing DTS parsing or DTB serialization here.
@@ -23,7 +23,7 @@ static char dtbp_active_tmp[4096];
 extern void dtbp_fill_fullpaths(struct node* tree, const char* prefix);
 
 /* DTC fatal helpers call exit(). In the standalone CLI that is fine; inside
- * Gatito Dtb Pacher it would terminate the GUI. The native build compiles
+ * Gatito DTB-Patcher it would terminate the GUI. The native build compiles
  * DTC with -Dexit=dtbp_dtc_exit so fatal DTC paths return here. */
 void dtbp_dtc_exit(int status){
     if(dtbp_exit_active){

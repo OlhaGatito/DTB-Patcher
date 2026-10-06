@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout Gatito Dtb Pacher
+      - name: Checkout Gatito DTB-Patcher
         uses: actions/checkout@v4
 
       - name: Install MSYS2
@@ -41,19 +41,19 @@ jobs:
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
-          bash native/build_dtc_msys2.sh "$PWD" /tmp/gatito-dtb-pacher-dtc
+          bash native/build_dtc_msys2.sh "$PWD" /tmp/gatito-dtb-patcher-dtc
 
       - name: Build native application and regression tests
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
-          bash native/build_native_msys2.sh "$PWD" /tmp/gatito-dtb-pacher-dtc
+          bash native/build_native_msys2.sh "$PWD" /tmp/gatito-dtb-patcher-dtc
 
       - name: Verify runtime dependencies
         shell: msys2 {0}
         run: |
           cd "$GITHUB_WORKSPACE"
-          deps="$(ldd build/Gatito-Dtb-Pacher.exe 2>/dev/null || true)"
+          deps="$(ldd build/Gatito-DTB-Patcher.exe 2>/dev/null || true)"
           echo "$deps"
           if echo "$deps" | grep -Eiq 'libwinpthread|libstdc\+\+-6|libgcc_s_seh'; then
             echo "Standalone runtime check failed: MinGW runtime DLL dependency detected."
@@ -63,15 +63,15 @@ jobs:
       - name: Verify executable
         shell: pwsh
         run: |
-          if (!(Test-Path "build\\Gatito-Dtb-Pacher.exe")) { throw "Native executable was not produced." }
-          Get-Item "build\\Gatito-Dtb-Pacher.exe" | Select-Object FullName,Length
+          if (!(Test-Path "build\\Gatito-DTB-Patcher.exe")) { throw "Native executable was not produced." }
+          Get-Item "build\\Gatito-DTB-Patcher.exe" | Select-Object FullName,Length
 
       - name: Package
         shell: pwsh
-        run: Compress-Archive -Path build\\Gatito-Dtb-Pacher.exe -DestinationPath Gatito-Dtb-Pacher-Windows-Native.zip -Force
+        run: Compress-Archive -Path build\\Gatito-DTB-Patcher.exe -DestinationPath Gatito-DTB-Patcher-Windows-Native.zip -Force
 
       - name: Upload native build
         uses: actions/upload-artifact@v4
         with:
-          name: Gatito Dtb Pacher-Windows-Native
-          path: Gatito-Dtb-Pacher-Windows-Native.zip
+          name: Gatito DTB-Patcher-Windows-Native
+          path: Gatito-DTB-Patcher-Windows-Native.zip

@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping improve Gatito Dtb Pacher.
+Thank you for helping improve Gatito DTB-Patcher.
 
 ## Development rules
 

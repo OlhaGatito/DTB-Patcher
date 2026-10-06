@@ -3,7 +3,7 @@ Device Tree Compiler (dtc)
 Upstream project:
 https://github.com/dgibson/dtc
 
-The Gatito Dtb Pacher build incorporates DTC source code under
+The Gatito DTB-Patcher build incorporates DTC source code under
 GPL-2.0-or-later.
 
 The native build pins DTC to commit:

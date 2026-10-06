@@ -7,7 +7,7 @@ if [[ "$SCRIPT_DIR" != /* ]]; then
   SCRIPT_DIR="$PWD/$SCRIPT_DIR"
 fi
 PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-${SCRIPT_DIR%/native}}}"
-DTC_DIR="${2:-/tmp/gatito-dtb-pacher-dtc}"
+DTC_DIR="${2:-/tmp/gatito-dtb-patcher-dtc}"
 DTC_REPO="https://github.com/dgibson/dtc.git"
 DTC_COMMIT="7a1e017926004ecff5fce62d62d42ce9f3e00082"
 

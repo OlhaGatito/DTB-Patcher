@@ -3,7 +3,7 @@
 /memreserve/ 0x0000000000001000 0x0000000000000100;
 
 / {
-    compatible = "gatito_dtb_pacher,smoke";
+    compatible = "gatito_dtb_patcher,smoke";
     model = "gatito Native Smoke Test";
     #address-cells = <1>;
     #size-cells = <0>;

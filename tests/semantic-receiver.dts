@@ -1,7 +1,7 @@
 /dts-v1/;
 
 / {
-    compatible = "gatito-dtb-pacher,semantic-receiver";
+    compatible = "gatito-dtb-patcher,semantic-receiver";
 
     gpio1: gpio@0 {
         phandle = <7>;

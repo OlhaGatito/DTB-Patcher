@@ -7,7 +7,7 @@ Project: Device Tree Compiler
 Upstream:
 https://github.com/dgibson/dtc
 
-Gatito Dtb Pacher's native branch is designed to compile and link DTC source into the application.
+Gatito DTB-Patcher's native branch is designed to compile and link DTC source into the application.
 
 License:
 GPL-2.0-or-later

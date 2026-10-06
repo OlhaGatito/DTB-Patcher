@@ -7,7 +7,7 @@ if [[ "$SCRIPT_DIR" != /* ]]; then
   SCRIPT_DIR="$PWD/$SCRIPT_DIR"
 fi
 PROJECT_DIR="${1:-${GATITO_PROJECT_DIR:-${SCRIPT_DIR%/native}}}"
-DTC_DIR="${2:-/tmp/gatito-dtb-pacher-dtc}"
+DTC_DIR="${2:-/tmp/gatito-dtb-patcher-dtc}"
 export PATH="/ucrt64/bin:/usr/bin:${PATH:-}"
 
 cd "$PROJECT_DIR"
@@ -33,7 +33,7 @@ g++ -std=c++17 -O2 -mwindows \
     "$DTC_DIR/dtc-lexer.lex.o" "$DTC_DIR/dtc-parser.tab.o" \
     "$DTC_DIR/libfdt/libfdt.a" \
     -static -static-libgcc -static-libstdc++ \
-    -lgdiplus -lcomctl32 -o build/Gatito-Dtb-Pacher.exe
+    -lgdiplus -lcomctl32 -o build/Gatito-DTB-Patcher.exe
 
 echo "[TEST] Native DTC smoke test"
 g++ -std=c++17 -O2 -I"$DTC_DIR" -I"$DTC_DIR/libfdt" \
@@ -54,5 +54,5 @@ echo "[TEST] DTS parser regression"
 g++ -std=c++17 -O2 native/test_parser.cpp native/dtb_model.cpp -o build/test_parser.exe
 ./build/test_parser.exe tests/parser-regression.dts
 
-test -s build/Gatito-Dtb-Pacher.exe
+test -s build/Gatito-DTB-Patcher.exe
 echo "[OK] Native build and all smoke tests passed."
