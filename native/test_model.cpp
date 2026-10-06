@@ -14,9 +14,16 @@ int main(int argc,char** argv){
     }
 
     DtbNode donor,receiver;
-    if(!readTree(argv[1],donor)||!readTree(argv[2],receiver)){
-        std::fprintf(stderr,"semantic model parse failed\n");
+    // Debug info
+    std::fprintf(stderr,"Parsing donor: %s\n",argv[1]);
+    std::fprintf(stderr,"Parsing receiver: %s\n",argv[2]);
+    if(!readTree(argv[1],donor)){
+        std::fprintf(stderr,"Failed to parse donor\n");
         return 3;
+    }
+    if(!readTree(argv[2],receiver)){
+        std::fprintf(stderr,"Failed to parse receiver\n");
+        return 4;
     }
 
     auto plan=build_transfer_plan(donor,receiver);

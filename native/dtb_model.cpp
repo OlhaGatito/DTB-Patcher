@@ -57,7 +57,7 @@ std::vector<std::string> lex(const std::string& in){
         size_t j=i;
         while(j<in.size() &&
               !std::isspace((unsigned char)in[j]) &&
-              std::string("{};=<>[]:").find(in[j])==std::string::npos)++j;
+              std::string("{};=<>[],:").find(in[j])==std::string::npos)++j;
         o.push_back(in.substr(i,j-i));
         i=j;
     }
@@ -704,7 +704,15 @@ bool parse_dts_file(const std::string& f,DtbNode& root){
         while(p.p<p.t.size()&&p.t[p.p]!=";")++p.p;
         if(p.p<p.t.size())++p.p;
     }
-    return p.p<p.t.size()&&p.node(root,"/");
+    if(p.p>=p.t.size()){
+        std::fprintf(stderr,"[DEBUG] parse_dts_file: p.p=%zu >= p.t.size()=%zu (no opening brace)\n",p.p,p.t.size());
+        return false;
+    }
+    if(!p.node(root,"/")){
+        std::fprintf(stderr,"[DEBUG] parse_dts_file: p.node(root,\"/\") failed at token %zu\n",p.p);
+        return false;
+    }
+    return true;
 }
 
 bool render_dts(const DtbNode& root,const std::string& f){
