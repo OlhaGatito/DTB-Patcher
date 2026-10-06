@@ -68,6 +68,7 @@ int dtbp_dtc_decompile(const char* dtb_path,const char* dts_path) {
     dt_to_source(out,dti);
     fclose(out);dtbp_active_out=NULL;dtbp_active_tmp[0]=0;
 
+    remove(dts_path);
     if(rename(tmp,dts_path)!=0){
         remove(tmp);
         set_error("Could not finalize DTS output.");
@@ -105,6 +106,7 @@ int dtbp_dtc_compile(const char* dts_path,const char* dtb_path) {
     dt_to_blob(out,dti,DEFAULT_FDT_VERSION);
     fclose(out);dtbp_active_out=NULL;dtbp_active_tmp[0]=0;
 
+    remove(dtb_path);
     if(rename(tmp,dtb_path)!=0){
         remove(tmp);
         set_error("Could not finalize DTB output.");
