@@ -207,23 +207,41 @@ async function analyzeFiles() {
         log('[...] Analisando DTBs com DTC/WASM...');
         setStatus('Analisando...');
 
-        const result = Module.ccall(
-            'analyze',
-            'string',
-            ['string', 'string'],
-            ['/tmp/donor.dtb', '/tmp/receiver.dtb']
-        );
+        let parsed = null;
 
-        if (result !== 'OK') {
-            const detail = getNativeError();
-            throw new Error(detail || result || 'O WASM recusou a análise.');
+        // Prefer the semantic WASM bridge. Some deployed artifacts currently
+        // reject valid DTBs before reaching the semantic layer; in that case
+        // use the local browser FDT parser so analysis remains usable without
+        // uploading the user's DTB anywhere.
+        try {
+            const result = Module.ccall(
+                'analyze',
+                'string',
+                ['string', 'string'],
+                ['/tmp/donor.dtb', '/tmp/receiver.dtb']
+            );
+
+            if (result === 'OK') {
+                const jsonStr = Module.ccall('get_analysis', 'string', [], []);
+                parsed = JSON.parse(jsonStr);
+                if (!Array.isArray(parsed)) parsed = null;
+            } else {
+                const detail = getNativeError();
+                log('[AVISO] WASM não conseguiu analisar o Doador: ' + (detail || result));
+            }
+        } catch (wasmError) {
+            log('[AVISO] Falha no analisador WASM: ' + (wasmError?.message || wasmError));
         }
 
-        const jsonStr = Module.ccall('get_analysis', 'string', [], []);
-        const parsed = JSON.parse(jsonStr);
-
-        if (!Array.isArray(parsed)) {
-            throw new Error('get_analysis não retornou uma lista JSON válida.');
+        if (!parsed) {
+            if (!window.GatitoFdt?.parse || !window.GatitoFdt?.buildAnalysis) {
+                throw new Error('O analisador WASM falhou e o analisador local não está disponível.');
+            }
+            log('[...] Usando analisador FDT local do navegador como fallback...');
+            const donorTree = window.GatitoFdt.parse(uploadedFiles.donor.bytes);
+            const receiverTree = window.GatitoFdt.parse(uploadedFiles.receiver.bytes);
+            parsed = window.GatitoFdt.buildAnalysis(donorTree, receiverTree);
+            log('[OK] FDT local: Doador e Receptor decodificados no navegador.');
         }
 
         analysisData = parsed;
