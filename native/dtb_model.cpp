@@ -701,8 +701,8 @@ bool parse_dts_file(const std::string& f,DtbNode& root){
             root.memreserve.push_back(label.empty()?"/memreserve/ "+v:label+": /memreserve/ "+v);
             continue;
         }
-        while(p.p<p.t.size()&&p.t[p.p]!=";")++p.p;
-        if(p.p<p.t.size())++p.p;
+        while(p.p<p.t.size()&&p.t[p.p]!=";"&&p.t[p.p]!="{")++p.p;
+        if(p.p<p.t.size()&&p.t[p.p]==";")++p.p;
     }
     if(p.p>=p.t.size()){
         std::fprintf(stderr,"[DEBUG] parse_dts_file: p.p=%zu >= p.t.size()=%zu (no opening brace)\n",p.p,p.t.size());

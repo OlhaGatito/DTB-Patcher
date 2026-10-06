@@ -63,7 +63,7 @@ if not exist "build\Gatito-DTB-Patcher.exe" goto :error_missing
 echo.
 echo [3/3] Validando o executavel...
 echo.
-"%BASH%" -lc "test -s build/Gatito-DTB-Patcher.exe"
+for %%F in ("build\Gatito-DTB-Patcher.exe") do if %%~zF LEQ 0 goto :error_validate
 if errorlevel 1 goto :error_validate
 
 echo.
