@@ -10,6 +10,7 @@
 
 let Module = null;
 let analysisData = [];
+let uploadedFiles = { donor: null, receiver: null };
 let currentTab = 0;
 const selectedKeys = new Set();
 
@@ -62,15 +63,13 @@ function setStatus(text) {
 }
 
 function hasFile(path) {
-    try {
-        Module.FS.stat(path);
-        return true;
-    } catch (_) {
-        return false;
-    }
+    try { return !!Module?.FS?.stat?.(path); } catch (_) { return false; }
 }
 
 function writeFile(path, bytes) {
+    if (!Module?.FS?.writeFile) {
+        throw new Error('O armazenamento temporário do WASM ainda não está disponível.');
+    }
     if (hasFile(path)) {
         try { Module.FS.unlink(path); } catch (_) {}
     }
@@ -78,9 +77,15 @@ function writeFile(path, bytes) {
 }
 
 function removeFile(path) {
-    try {
-        if (hasFile(path)) Module.FS.unlink(path);
-    } catch (_) {}
+    try { if (Module?.FS && hasFile(path)) Module.FS.unlink(path); } catch (_) {}
+}
+
+function storeUploadedFile(type, file, bytes) {
+    uploadedFiles[type] = {
+        name: file.name,
+        size: bytes.byteLength,
+        bytes: new Uint8Array(bytes)
+    };
 }
 
 async function selectFile(type) {
@@ -105,14 +110,20 @@ async function selectFile(type) {
             const data = new Uint8Array(await file.arrayBuffer());
             const path = type === 'donor' ? '/tmp/donor.dtb' : '/tmp/receiver.dtb';
 
-            writeFile(path, data);
+            storeUploadedFile(type, file, data);
+
+            try {
+                if (Module?.FS?.writeFile) writeFile(path, data);
+            } catch (_) {
+                log('[AVISO] FS do WASM indisponível; usando armazenamento temporário do navegador.');
+            }
 
             const inputEl = type === 'donor'
                 ? document.getElementById('donorFile')
                 : document.getElementById('receiverFile');
 
             inputEl.value = file.name;
-            log('[OK] ' + file.name + ' carregado (' + (data.byteLength / 1024).toFixed(1) + ' KB)');
+            log('[OK] ' + file.name + ' carregado temporariamente (' + (data.byteLength / 1024).toFixed(1) + ' KB)');
 
             // A seleção de arquivos invalida a análise anterior.
             invalidateAnalysis();
@@ -141,12 +152,8 @@ function swapFiles() {
         }
 
         // Troca os bytes no FS virtual, não apenas os nomes exibidos.
-        const donorBytes = hasFile('/tmp/donor.dtb')
-            ? new Uint8Array(Module.FS.readFile('/tmp/donor.dtb'))
-            : null;
-        const receiverBytes = hasFile('/tmp/receiver.dtb')
-            ? new Uint8Array(Module.FS.readFile('/tmp/receiver.dtb'))
-            : null;
+        const donorBytes = uploadedFiles.donor ? new Uint8Array(uploadedFiles.donor.bytes) : null;
+        const receiverBytes = uploadedFiles.receiver ? new Uint8Array(uploadedFiles.receiver.bytes) : null;
 
         if (receiverBytes) writeFile('/tmp/donor.dtb', receiverBytes);
         else removeFile('/tmp/donor.dtb');
@@ -182,8 +189,16 @@ async function analyzeFiles() {
         return;
     }
 
-    if (!hasFile('/tmp/donor.dtb') || !hasFile('/tmp/receiver.dtb')) {
+    if (!uploadedFiles.donor || !uploadedFiles.receiver) {
         log('[ERRO] Selecione ambos os DTBs');
+        return;
+    }
+
+    try {
+        writeFile('/tmp/donor.dtb', uploadedFiles.donor.bytes);
+        writeFile('/tmp/receiver.dtb', uploadedFiles.receiver.bytes);
+    } catch (error) {
+        log('[ERRO] Não foi possível preparar os DTBs para o WASM: ' + (error?.message || error));
         return;
     }
 
