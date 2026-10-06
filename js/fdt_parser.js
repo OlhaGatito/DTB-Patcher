@@ -12,7 +12,7 @@
 
   function be32(v, o) {
     if (o < 0 || o + 4 > v.length) throw new Error('DTB truncado ao ler u32.');
-    return ((v[o] << 24) >>> 0) | (v[o + 1] << 16) | (v[o + 2] << 8) | v[o + 3];
+    return (((v[o] << 24) >>> 0) | (v[o + 1] << 16) | (v[o + 2] << 8) | v[o + 3]) >>> 0;
   }
   function align4(n) { return (n + 3) & ~3; }
 
