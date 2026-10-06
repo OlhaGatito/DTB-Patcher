@@ -48,14 +48,14 @@ echo.
 echo [1/3] Baixando e compilando o DTC oficial em commit fixo...
 echo.
 
-"%BASH%" native/build_dtc_msys2.sh
+"%BASH%" native/build_dtc_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-patcher-dtc
 if errorlevel 1 goto :error_dtc
 
 echo.
 echo [2/3] Compilando o Gatito DTB-Patcher e executando os testes...
 echo.
 
-"%BASH%" native/build_native_msys2.sh /tmp/gatito-dtb-patcher-dtc
+"%BASH%" native/build_native_msys2.sh "%PROJECT_DIR_UNIX%" /tmp/gatito-dtb-patcher-dtc
 if errorlevel 1 goto :error_tests
 
 if not exist "build\Gatito-DTB-Patcher.exe" goto :error_missing

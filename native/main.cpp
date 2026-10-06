@@ -668,7 +668,7 @@ static void build(){
 
         std::string verifyDtb=tempPath("verify-roundtrip.dtb");
         if(dtbp_dtc_compile(verifyDts.c_str(),verifyDtb.c_str())||
-           readWholeFile(verifyDtb)!=readWholeFile(out)){
+           readWholeFile(verifyDtb)!=readWholeFile(out.string())){
             std::string e=dtbp_dtc_error();
             if(e.empty())e="O round-trip nao reproduziu exatamente o DTB gerado.";
             logLine("VALIDACAO FALHOU: estabilidade binaria: "+e);

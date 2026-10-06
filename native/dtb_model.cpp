@@ -89,7 +89,7 @@ struct Parser{
             // Recombine comma-separated identifier tokens only at the
             // statement/name position; values are handled by until().
             while(p+1<t.size()&&t[p]==","&&
-                  !std::isspace((unsigned char)t[p+1])&&
+                  !std::isspace((unsigned char)t[p+1][0])&&
                   t[p+1]!=";"&&t[p+1]!="="&&t[p+1]!="{"&&t[p+1]!="}") {
                 a+=","+t[p+1];
                 p+=2;
@@ -415,7 +415,7 @@ bool parseFirstCell(const std::string& value,uint32_t& out){
     if(!tok.empty()&&tok[0]=='&')return false;
     char* ep=nullptr;
     unsigned long v=std::strtoul(tok.c_str(),&ep,0);
-    if(!ep||*ep!='\\0'||v>0xffffffffUL)return false;
+    if(!ep||*ep!='\0'||v>0xffffffffUL)return false;
     out=(uint32_t)v;
     return true;
 }
@@ -458,7 +458,7 @@ const DtbNode* matchReferencedNode(const DtbNode& donorRoot,const DtbNode& recei
     }else{
         char* ep=nullptr;
         unsigned long v=std::strtoul(reference.c_str(),&ep,0);
-        if(ep&&*ep=='\\0'&&v<=0xffffffffUL)
+        if(ep&&*ep=='\0'&&v<=0xffffffffUL)
             donorTarget=findByPhandle(donorRoot,(uint32_t)v);
     }
     if(!donorTarget)return nullptr;
