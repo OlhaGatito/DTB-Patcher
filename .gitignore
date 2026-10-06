@@ -1,15 +1,23 @@
-# Native build output
-build/
+# Build artifacts
 *.o
 *.obj
-*.a
-*.dll
 *.exe
+*.rsp
+*.sh
+CMakeLists.txt
+Makefile*
+dev-server.py
+server.py
+build.py
+link.rsp
 
-# IDE / editor
+# Dependencies & temporary folders
+dtc-src/
+build/
+build-wasm/
 .vscode/
 .idea/
 
-# Temporary DTB/DTS artifacts
-*.dts.tmp
-*.dtb.tmp
+# OS files
+.DS_Store
+Thumbs.db

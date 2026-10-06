@@ -1,87 +1,98 @@
-# 🚀 Gatito DTB‑Patcher
+# 🐱 Gatito DTB-Patcher
 
-> **Analise, compare e gere novos Device Tree Blobs** com total controle sobre cada transferência.
+**Ferramenta web para comparar e transferir blocos funcionais entre arquivos Device Tree.**
 
-![Saruê mascot](assets/sarue.svg)
-
----
-
-## ✨ Principais recursos
-
-| ✅ | Recurso |
-|----|---------|
-| 🪟 **GUI nativa Windows** (Win32 + GDI+) |
-| 🛠️ **Device Tree Compiler embutido** – nada de `dtc.exe` externo |
-| 🔍 **Comparação visual por categoria** (Controles, Áudio, Display, Energia, Outros) |
-| 📄 **Preview completo do DTS** antes da compilação |
-| 📁 **Logs permanentes** em `Documents/Gatito Dtb Patcher/Logs/` |
-| 📦 **Geração automática de patches numerados** (`patch‑001.dtb`, `patch‑002.dtb`, …) |
-| 🎯 **Transferência auditável** – veja caminho, tipo, categoria e motivo antes de aplicar |
+Acesse agora: **https://olhagatito.github.io/DTB-Patcher/**
 
 ---
 
-## 📦 Instalação (usuário final)
+## 🎯 O que faz
 
-1. Baixe o **executável** da última *release* (arquivo `.exe`).
-2. Execute‑o – não precisa instalar **Python, MinGW, GCC, MSYS2, Flex/Bison** ou `dtc`.
-3. Na primeira execução, o programa cria `Documents/Gatito Dtb Patcher/` com as pastas de **logs**, **novos DTBs** e **DTBs de referência**.
+- 📤 **Upload** de dois arquivos DTS (ou DTB convertido para DTS)
+- 📊 **Análise automática** de diferenças categorizadas
+- ✅ **Seleção granular** de itens a transferir
+- 📥 **Download** do novo DTB/DTS modificado
+- 🌐 **100% Online** — sem backend, sem instalação
 
-> 📋 Todos os detalhes técnicos (build, contribuição, segurança, licenças) estão no repositório **`Main`**.
+## 🚀 Como usar
 
----
-
-## 🛠️ Como funciona (resumido)
-
+### 1️⃣ Abra o site
 ```
-DTB Doador → DTC nativo → DTS (descompactado)
-         → comparação por blocos funcionais →
-DTB Receptor (base) → substituição de props →
-preview DTS → compilação → novo DTB
+https://olhagatito.github.io/DTB-Patcher/
 ```
 
-- **Nenhum arquivo original é sobrescrito** – Doador e Receptor permanecem intactos.
-- **Geração automática** de patches numerados.
-- **Validação round‑trip** (DTS → DTB → DTS idêntico?).
+### 2️⃣ Prepare seus arquivos
+
+**Opção A: Usar arquivos DTS (recomendado)**
+- Faça upload direto
+
+**Opção B: Converter DTB para DTS**
+```bash
+dtc -I dtb -O dts seu_arquivo.dtb -o seu_arquivo.dts
+```
+
+### 3️⃣ Selecione e analise
+
+1. Clique **Selecionar** para carregar o DTB Doador
+2. Clique **Selecionar** para carregar o DTB Receptor
+3. Clique **Analisar DTBs**
+4. Marque/desmarque itens conforme necessário
+5. Clique **Gerar** para download do resultado
+
+## 📋 Categorias
+
+- **🎮 Controles** — Joysticks, botões, GPIO
+- **🔊 Áudio** — Codecs, I2S, DAI
+- **🖥 Display** — Painel, backlight, DSI
+- **🔋 Energia** — Bateria, carregador, ADC
+- **🛠 Outros** — Diferenças diversas
+
+## 🛠 Tecnologia
+
+| Componente | Detalhe |
+|-----------|--------|
+| **Frontend** | HTML5 + CSS3 + JavaScript ES6+ |
+| **Backend** | C++ compilado para WebAssembly (Emscripten) |
+| **Biblioteca** | libfdt (Device Tree) |
+| **Deploy** | GitHub Pages (automático) |
+
+**Totalmente client-side** — nenhum dado sai do seu navegador.
+
+## 📦 Arquivos do Repositório
+
+```
+DTB-Patcher/
+├── index.html                      # Interface web
+├── js/app.js                       # Lógica JavaScript
+├── wasm/
+│   ├── gatito_dtb_patcher.js      # Glue Emscripten
+│   └── gatito_dtb_patcher.wasm    # Binário (172 KB)
+├── native/
+│   ├── dtb_model.hpp/cpp          # Estruturas DTB
+│   └── dtb_database.hpp/cpp       # Análise de blocos
+├── .github/workflows/static.yml   # Deploy automático
+├── README.md                       # Este arquivo
+├── LICENSE                         # GPL-2.0+
+└── CHANGELOG.md                    # Histórico de versões
+```
+
+## ⚙️ Build (Dev)
+
+Para recompilar o WASM após mudanças:
+
+```bash
+# Requer Emscripten SDK
+emcc -O3 -s WASM=1 ... dtc-src/libfdt/*.c native/*.cpp -o wasm/gatito_dtb_patcher.js
+```
+
+## 📝 Créditos
+
+Desenvolvido para **ROCKNIX** / **Aurknix** / **ArkOS** community.
+
+## 📄 Licença
+
+GPL-2.0+ — compatível com DTC oficial
 
 ---
 
-## 🎯 Fluxo típico
-
-1. Abra a GUI.
-2. Selecione **DTB Doador** (onde você busca as props novas).
-3. Selecione **DTB Receptor** (a base que será alterada).
-4. O programa lista as diferenças por **categoria** (GPIO, Áudio, Display, etc).
-5. **Selecione explicitamente** quais blocos do Doador você quer transferir para o Receptor.
-6. **Preview** do DTS final.
-7. **Gere** o novo DTB com um clique.
-8. Resultado salvo em `Documents/Gatito Dtb Patcher/New dtb/patch‑001.dtb`.
-
----
-
-## 📚 Documentação e contribuição
-
-| 📖 Documento | Localização |
-|-------------|------------|
-| 🏗️ Arquitetura nativa | `Main/docs/DTB-PATCHER-ARCHITECTURE.md` |
-| 📖 Guia de contribuição | `Main/CONTRIBUTING.md` |
-| 🔐 Segurança e boas práticas | `Main/SECURITY.md` |
-| 📦 Licença do DTC (GPL‑2.0‑or‑later) | `Main/tools/DTC-LICENSE.txt` |
-| 📄 Histórico de mudanças | `Main/CHANGELOG.md` |
-
----
-
-## 🧑‍💻 Como contribuir
-
-1. **Fork** do repositório **`Main`** (código‑fonte).
-2. Implemente correções ou novas funcionalidades.
-3. Abra *pull‑request* descrevendo as mudanças.
-4. Se o CI validar, uma nova *release* será publicada aqui, pronta para download.
-
----
-
-## ⚖️ Licença
-
-O código incorpora o **Device Tree Compiler (DTC)** sob **GPL‑2.0‑or‑later**.  
-Consulte `Main/tools/DTC-LICENSE.txt` para detalhes.
-
----
+**Problemas?** Abra uma [issue](https://github.com/OlhaGatito/DTB-Patcher/issues)
